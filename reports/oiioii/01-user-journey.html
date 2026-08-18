@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="基于 OiiOii 产品操作流程截图整理的用户旅程问题、证据与产品机会。">
+  <title>OiiOii 用户旅程问题报告</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f1eb;
+      --surface: #fffdf8;
+      --surface-2: #ebe7de;
+      --text: #1f211e;
+      --muted: #666b63;
+      --line: #d4d0c6;
+      --accent: #d84a82;
+      --accent-soft: #f8dcea;
+      --danger: #b9382f;
+      --danger-soft: #f8dfdb;
+      --warn: #8a5a00;
+      --warn-soft: #f4e7bf;
+      --success: #1d6b4f;
+      --success-soft: #d9eee5;
+      --info: #315f95;
+      --info-soft: #dce8f4;
+      --shadow: 0 16px 45px rgba(35, 31, 24, .08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111310;
+        --surface: #1a1d19;
+        --surface-2: #242821;
+        --text: #f1f1ec;
+        --muted: #b4b8af;
+        --line: #373c34;
+        --accent: #ff4fa2;
+        --accent-soft: #4b2438;
+        --danger: #ff8177;
+        --danger-soft: #452421;
+        --warn: #f2bf5e;
+        --warn-soft: #40351c;
+        --success: #77d7ad;
+        --success-soft: #1e3d30;
+        --info: #8eb9ee;
+        --info-soft: #21344d;
+        --shadow: 0 16px 45px rgba(0, 0, 0, .22);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 88% 4%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    a { color: inherit; }
+
+    button,
+    textarea { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 72px 0 42px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p { margin-top: 0; }
+
+    h1 {
+      max-width: 820px;
+      margin-bottom: 18px;
+      font-size: clamp(36px, 7vw, 76px);
+      line-height: 1.02;
+      letter-spacing: -.055em;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1.16;
+      letter-spacing: -.035em;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    .hero-copy {
+      max-width: 790px;
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .verdict {
+      display: grid;
+      grid-template-columns: 1.4fr .6fr;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .panel,
+    .issue-card,
+    .opportunity,
+    .notes {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; }
+
+    .verdict strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 22px;
+    }
+
+    .verdict p { margin: 0; color: var(--muted); }
+
+    .positive { border-top: 4px solid var(--success); }
+    .negative { border-top: 4px solid var(--danger); }
+
+    .meta-row,
+    .legend,
+    .filter-row,
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip,
+    .tag,
+    .evidence-id {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      width: fit-content;
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .chip {
+      padding: 8px 11px;
+      background: var(--surface-2);
+      color: var(--muted);
+    }
+
+    .tag,
+    .evidence-id { padding: 6px 9px; }
+    .fact { background: var(--success-soft); color: var(--success); }
+    .inference { background: var(--warn-soft); color: var(--warn); }
+    .unknown { background: var(--surface-2); color: var(--muted); }
+    .p0 { background: var(--danger-soft); color: var(--danger); }
+    .p1 { background: var(--warn-soft); color: var(--warn); }
+    .p2 { background: var(--info-soft); color: var(--info); }
+
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(16px);
+    }
+
+    .sticky-nav .shell {
+      display: flex;
+      gap: 6px;
+      padding: 10px 0;
+      overflow-x: auto;
+    }
+
+    .sticky-nav a {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 9px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .sticky-nav a:hover,
+    .sticky-nav a:focus-visible {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    main { padding: 56px 0 90px; }
+    section { margin-bottom: 72px; scroll-margin-top: 72px; }
+    .section-copy { max-width: 760px; color: var(--muted); }
+
+    .journey-strip {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      margin-top: 28px;
+      border-top: 2px solid var(--line);
+    }
+
+    .journey-step {
+      position: relative;
+      padding: 19px 8px 0;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .journey-step::before {
+      content: "";
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      transform: translateX(-50%);
+      border: 2px solid var(--bg);
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .journey-step.friction::before { background: var(--warn); }
+    .journey-step.break::before { background: var(--danger); }
+    .journey-step strong { display: block; color: var(--text); }
+
+    .issue-grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 26px;
+    }
+
+    .issue-card {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 20px;
+      padding: 24px;
+    }
+
+    .issue-card[hidden] { display: none; }
+
+    .issue-number {
+      display: grid;
+      place-items: center;
+      align-self: start;
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: var(--surface-2);
+      color: var(--accent);
+      font-size: 22px;
+      font-weight: 750;
+    }
+
+    .issue-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .issue-title p { max-width: 750px; margin: 0; color: var(--muted); }
+
+    .issue-body {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .issue-block {
+      min-width: 0;
+      padding: 15px;
+      border-radius: 13px;
+      background: var(--surface-2);
+    }
+
+    .issue-block b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .issue-block p,
+    .issue-block ul { margin-bottom: 0; }
+    .issue-block p,
+    .issue-block li { color: var(--muted); }
+    .issue-block ul { padding-left: 18px; }
+
+    details {
+      margin-top: 15px;
+      border-top: 1px solid var(--line);
+      padding-top: 13px;
+    }
+
+    summary {
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    .evidence-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .evidence-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 9px;
+      align-items: start;
+    }
+
+    .evidence-row p { margin: 0; color: var(--muted); }
+
+    .filter-row { margin-top: 22px; }
+
+    .filter-btn {
+      appearance: none;
+      padding: 9px 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .filter-btn[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .priority-table-wrap {
+      margin-top: 26px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .opportunity-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .opportunity { padding: 22px; }
+
+    .opportunity .index {
+      display: inline-block;
+      margin-bottom: 17px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: .1em;
+    }
+
+    .opportunity ul { margin-bottom: 0; padding-left: 20px; }
+    .opportunity li + li { margin-top: 6px; }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .principle {
+      padding: 18px;
+      border-left: 4px solid var(--accent);
+      background: var(--surface);
+    }
+
+    .principle strong { display: block; margin-bottom: 5px; }
+    .principle p { margin: 0; color: var(--muted); }
+
+    .notes { padding: 24px; }
+    .notes label { display: block; margin-bottom: 9px; font-weight: 700; }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+    .note-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .action-btn {
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .action-btn.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .note-status { color: var(--muted); font-size: 13px; }
+
+    footer {
+      padding: 24px 0 40px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 850px) {
+      .verdict,
+      .opportunity-grid { grid-template-columns: 1fr; }
+      .issue-body,
+      .principles { grid-template-columns: 1fr; }
+      .journey-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 28px; }
+      .issue-card { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      .shell { width: min(100% - 22px, 1180px); }
+      .hero { padding-top: 46px; }
+      .journey-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .issue-card { padding: 17px; }
+      .issue-number { width: 48px; height: 48px; }
+    }
+
+    @media print {
+      .sticky-nav,
+      .filter-row,
+      .notes { display: none !important; }
+      body { background: #fff; color: #111; }
+      .panel,
+      .issue-card,
+      .opportunity { box-shadow: none; break-inside: avoid; }
+      details[open] { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="shell">
+      <p class="eyebrow">OiiOii · User Journey Review</p>
+      <h1>用户拿到了分镜视频，却无法确定任务是否真的完成</h1>
+      <p class="hero-copy">本报告仅基于18张页面截图中的真实操作记录，集中呈现用户从输入需求到预览成片过程中遇到的体验问题、证据和可落地的产品机会。</p>
+      <div class="meta-row">
+        <span class="chip">证据范围：S01–S18</span>
+        <span class="chip">当前可确认：4个分镜视频</span>
+        <span class="chip">尚未确认：最终成片</span>
+      </div>
+
+      <div class="verdict" aria-label="核心结论">
+        <article class="panel positive">
+          <strong>已经完成的价值</strong>
+          <p>故事被扩展为剧本，并形成角色、场景、道具和4个可播放/编辑的分镜视频卡片。</p>
+        </article>
+        <article class="panel negative">
+          <strong>尚未闭环</strong>
+          <p>最终预览提示素材不完整，资产库为空，最终视频没有实际播放证据。</p>
+        </article>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sticky-nav" aria-label="报告导航">
+    <div class="shell">
+      <a href="#journey">旅程断点</a>
+      <a href="#issues">问题清单</a>
+      <a href="#priority">优先级</a>
+      <a href="#opportunities">产品机会</a>
+      <a href="#principles">设计原则</a>
+      <a href="#notes">补充观察</a>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <section id="journey">
+      <p class="eyebrow">01 · Journey Breakpoints</p>
+      <h2>问题不是出在“生成不了”，而是出在过程和结果无法被信任</h2>
+      <p class="section-copy">主流程总体可以向前推进，明显摩擦集中在前置依赖、生成选择、异常恢复和最终状态四个位置。</p>
+
+      <div class="journey-strip" role="img" aria-label="用户旅程情绪变化：输入需求、剧本确认、角色确认、场景道具、分镜配置、样片、批量生成、最终预览">
+        <div class="journey-step"><strong>输入需求</strong><span>期待</span></div>
+        <div class="journey-step"><strong>剧本确认</strong><span>审慎</span></div>
+        <div class="journey-step"><strong>角色确认</strong><span>有进展感</span></div>
+        <div class="journey-step friction"><strong>场景/道具</strong><span>依赖阻断</span></div>
+        <div class="journey-step friction"><strong>分镜配置</strong><span>选择负担</span></div>
+        <div class="journey-step"><strong>样片</strong><span>获得信心</span></div>
+        <div class="journey-step"><strong>批量生成</strong><span>接近期望</span></div>
+        <div class="journey-step break"><strong>最终预览</strong><span>困惑/不信任</span></div>
+      </div>
+    </section>
+
+    <section id="issues">
+      <p class="eyebrow">02 · Issue Inventory</p>
+      <h2>问题清单</h2>
+      <p class="section-copy">按用户影响和修复紧迫度分为 P0、P1、P2。点击筛选可以只查看某一优先级。</p>
+
+      <div class="legend" aria-label="证据等级">
+        <span class="tag fact">页面事实</span>
+        <span class="tag inference">合理推断</span>
+        <span class="tag unknown">尚未确认</span>
+      </div>
+
+      <div class="filter-row" role="group" aria-label="问题优先级筛选">
+        <button class="filter-btn" type="button" data-filter="all" aria-pressed="true">全部问题</button>
+        <button class="filter-btn" type="button" data-filter="p0" aria-pressed="false">只看 P0</button>
+        <button class="filter-btn" type="button" data-filter="p1" aria-pressed="false">只看 P1</button>
+        <button class="filter-btn" type="button" data-filter="p2" aria-pressed="false">只看 P2</button>
+      </div>
+
+      <div class="issue-grid" id="issue-list">
+        <article class="issue-card" data-priority="p0">
+          <div class="issue-number">01</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p0">P0</span><span class="tag fact">页面事实</span></div>
+                <h3>“已生成”与“未完成”同时成立，最终状态不可判断</h3>
+                <p>聊天称分镜视频已生成，画布也出现4张视频卡；点击最终预览后却提示分镜视频、音效、BGM等素材未完全生成。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>无法判断当前结果能否交付，也不知道继续等待、补生成还是直接剪辑。</p></div>
+              <div class="issue-block"><b>根因判断</b><p>“镜头生成完成”“素材齐全”“最终成片完成”没有被拆成清晰、统一的状态。</p></div>
+              <div class="issue-block"><b>建议</b><p>统一状态源，并明确展示：镜头、台词、音效、BGM、合成各自完成度与下一步。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S07</span><p>中心画布可见4张分镜视频卡及“预览最终视频”入口。</p></div>
+                <div class="evidence-row"><span class="evidence-id fact">S08</span><p>警告原文：“分镜视频、音效、BGM等素材未完全生成”。</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>聊天、画布、资产库和任务队列对同一任务阶段使用同一状态；缺失素材逐项列出并提供补生成入口。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
+        <article class="issue-card" data-priority="p0">
+          <div class="issue-number">02</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p0">P0</span><span class="tag fact">页面事实</span></div>
+                <h3>画布有资产，资产库却为空</h3>
+                <p>剧本和视频卡已经存在于中心画布，但右侧节点列表显示“暂无节点”，资产页显示“这里还什么都没有”。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>无法确认资产是否被保存，也无法复用、比较版本或放心离开当前页面。</p></div>
+              <div class="issue-block"><b>根因判断</b><p>画布节点、生成结果和资产库可能使用不同的归档条件或同步时机。</p></div>
+              <div class="issue-block"><b>建议</b><p>生成成功即自动入库；所有资产显示来源、版本、状态和所在阶段。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S10</span><p>画布存在“我的剧本”，右侧同时显示“暂无节点”。</p></div>
+                <div class="evidence-row"><span class="evidence-id fact">S09</span><p>资产页原文：“这里还什么都没有”，中心仍可见4张视频卡。</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>新生成资产在页面刷新、切换标签和重新进入项目后仍可定位；画布和资产库数量、状态一致。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
+        <article class="issue-card" data-priority="p1">
+          <div class="issue-number">03</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p1">P1</span><span class="tag fact">页面事实</span></div>
+                <h3>修改入口存在，但修改范围、成本和回退能力不透明</h3>
+                <p>剧本、角色和视频阶段都提供“我要修改”或提示词编辑入口，但没有展示新旧版本、影响范围和回滚方式。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>用户担心重做一个角色或镜头会破坏已经满意的场景、道具或后续视频。</p></div>
+              <div class="issue-block"><b>尚未确认</b><p>截图没有记录一次完整纠偏，所以无法判断旧资产是否保留、是否重复扣费。</p></div>
+              <div class="issue-block"><b>建议</b><p>提供局部重生成、影响预览、版本对比、一键回退和生成前成本确认。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S02/S03/S07</span><p>可见“我要修改”、画布卡片编辑图标以及“修改提示词”说明。</p></div>
+                <div class="evidence-row"><span class="evidence-id unknown">未拍到</span><p>修改后的结果、版本历史、积分变化和对下游资产的影响。</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>用户可只重做选中对象；执行前看到影响资产、预计积分；生成后可恢复上一版本。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
+        <article class="issue-card" data-priority="p1">
+          <div class="issue-number">04</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p1">P1</span><span class="tag fact">页面事实</span></div>
+                <h3>前置依赖发现得太晚，打断用户节奏</h3>
+                <p>用户选择“生成道具”后，场景设计师才发现豪华会所私密包厢的多视图没有生成，必须返回补齐。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>刚做完阶段决策就被告知无法继续，增加等待和对流程稳定性的怀疑。</p></div>
+              <div class="issue-block"><b>根因判断</b><p>依赖校验发生在执行阶段，而不是进入阶段或呈现确认按钮之前。</p></div>
+              <div class="issue-block"><b>建议</b><p>在展示“生成道具”前完成一次依赖预检，缺失项自动排队并显示预计补齐时间。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S04</span><p>Agent“场景设计师”原文：“场景的多视图还没有生成，需要先补上这一步才能继续进入道具设计。”</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>进入下一阶段前一次性列出所有阻断项；系统自动修复时显示明确进度、结果和失败后的重试入口。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
+        <article class="issue-card" data-priority="p1">
+          <div class="issue-number">05</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p1">P1</span><span class="tag fact">页面事实</span></div>
+                <h3>模型、清晰度和批量策略缺少成本解释</h3>
+                <p>页面提供 Seedance 2.0、Pro/Fast、720p/480p、先小样/全部生成等选择，却没有同步展示积分、耗时和质量差异。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>用户难以做成本可控的选择，也不知道余额1,233 STAR能支持多少次生成。</p></div>
+              <div class="issue-block"><b>尚未确认</b><p>截图没有积分扣费记录，也没有积分不足后的产品处理。</p></div>
+              <div class="issue-block"><b>建议</b><p>把预计积分、时间、分辨率和推荐场景直接放进选项；确认前给出总成本。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S05/S17</span><p>可见 Pro/Fast、720p/480p，以及“先生成1个”与“生成全部”两个方案。</p></div>
+                <div class="evidence-row"><span class="evidence-id unknown">未拍到</span><p>单次成本、批量总成本、失败是否退款、余额不足提示。</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>每个选项显示预计积分和时间；提交前显示总计；余额不足时保留配置并允许充值后继续。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
+        <article class="issue-card" data-priority="p2">
+          <div class="issue-number">06</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p2">P2</span><span class="tag fact">页面事实</span></div>
+                <h3>“取消预览”与“中断任务”没有清晰区分</h3>
+                <p>最终预览警告提供“取消”，但页面没有任务级暂停、终止、恢复或返回上一版本的明确入口。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>用户无法确认取消只关闭弹窗，还是会取消生成、丢失进度或产生费用。</p></div>
+              <div class="issue-block"><b>尚未确认</b><p>截图没有发生完整的任务中断，因此无法评价恢复能力。</p></div>
+              <div class="issue-block"><b>建议</b><p>区分“关闭提示”“暂停任务”“终止任务”；终止前说明资产与积分处理，支持恢复。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S08</span><p>预览确认弹窗按钮为“取消”“确定”。</p></div>
+                <div class="evidence-row"><span class="evidence-id unknown">未拍到</span><p>任务暂停、任务终止、恢复生成及返回上一版本。</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>每类中断动作说明影响；重新进入项目后能恢复到最后一个成功节点。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
+        <article class="issue-card" data-priority="p2">
+          <div class="issue-number">07</div>
+          <div>
+            <div class="issue-head">
+              <div class="issue-title">
+                <div class="tags"><span class="tag p2">P2</span><span class="tag inference">合理推断</span></div>
+                <h3>聊天中的历史进度容易被误解为当前状态</h3>
+                <p>“正在为您生成分镜2、3、4的视频”进度卡与后续“已生成”结果同时保留，但没有明显标记前者已结束。</p>
+              </div>
+            </div>
+            <div class="issue-body">
+              <div class="issue-block"><b>用户影响</b><p>用户可能误以为生成仍在运行，或认为页面卡死在旧状态。</p></div>
+              <div class="issue-block"><b>根因判断</b><p>聊天时间线承担了任务状态职责，却没有把历史状态转为“已完成”或“已结束”。</p></div>
+              <div class="issue-block"><b>建议</b><p>进度卡完成后自动收起并显示最终状态、耗时和结果链接；当前状态固定展示在任务栏。</p></div>
+            </div>
+            <details>
+              <summary>查看证据与验收标准</summary>
+              <div class="evidence-list">
+                <div class="evidence-row"><span class="evidence-id fact">S07/S10</span><p>聊天仍显示“正在为您生成……”，同屏下方已有“3个视频”和完成确认。</p></div>
+                <div class="evidence-row"><span class="evidence-id inference">验收</span><p>历史进度卡标记结束时间；任务栏只显示当前状态；完成结果可直接定位到画布资产。</p></div>
+              </div>
+            </details>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="priority">
+      <p class="eyebrow">03 · Priority</p>
+      <h2>建议修复顺序</h2>
+      <p class="section-copy">优先恢复用户对“是否完成、资产是否保存”的信任，再解决修改效率和决策透明度。</p>
+      <div class="priority-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>优先级</th>
+              <th>问题</th>
+              <th>为什么先做</th>
+              <th>建议衡量指标</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="tag p0">P0</span></td><td>完成状态不一致</td><td>直接影响用户是否相信结果可以交付</td><td>预览成功率、完成状态误判反馈、生成后退出率</td></tr>
+            <tr><td><span class="tag p0">P0</span></td><td>资产库与画布不一致</td><td>影响保存感、复用和再次进入项目的信心</td><td>资产入库成功率、跨页面数量一致率、资产找回成功率</td></tr>
+            <tr><td><span class="tag p1">P1</span></td><td>修改与回退不透明</td><td>决定用户是否愿意持续迭代，而不是放弃重开</td><td>局部重生成率、回退成功率、修改后满意率</td></tr>
+            <tr><td><span class="tag p1">P1</span></td><td>依赖和成本后置</td><td>减少流程中断、意外等待和积分焦虑</td><td>阻断前置发现率、预算偏差、确认页退出率</td></tr>
+            <tr><td><span class="tag p2">P2</span></td><td>中断语义与历史进度</td><td>降低长任务中的焦虑和误操作</td><td>恢复成功率、重复提交率、状态咨询量</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="opportunities">
+      <p class="eyebrow">04 · Product Opportunities</p>
+      <h2>如果做同类产品，最值得抓住的机会</h2>
+      <div class="opportunity-grid">
+        <article class="opportunity">
+          <span class="index">OPPORTUNITY 01</span>
+          <h3>把“成片完整度”做成核心产品对象</h3>
+          <ul>
+            <li>逐项展示镜头、旁白、台词、音效、BGM、合成状态</li>
+            <li>缺失项可一键补生成，不让用户猜下一步</li>
+            <li>清晰区分“粗剪预览”“静音预览”“可交付成片”</li>
+          </ul>
+        </article>
+        <article class="opportunity">
+          <span class="index">OPPORTUNITY 02</span>
+          <h3>建立可回退的创作资产图谱</h3>
+          <ul>
+            <li>每个镜头标明依赖的剧本、角色、场景和道具版本</li>
+            <li>局部修改前预览受影响的下游资产</li>
+            <li>保留历史版本并允许对比、恢复和复用</li>
+          </ul>
+        </article>
+        <article class="opportunity">
+          <span class="index">OPPORTUNITY 03</span>
+          <h3>用“预算模式”替代模型参数堆叠</h3>
+          <ul>
+            <li>提供快速验证、平衡、最终质量三档目标</li>
+            <li>同步显示预计积分、时间、清晰度和失败处理</li>
+            <li>保留专业参数，但默认给出面向任务的推荐方案</li>
+          </ul>
+        </article>
+        <article class="opportunity">
+          <span class="index">OPPORTUNITY 04</span>
+          <h3>将异常恢复设计成主流程的一部分</h3>
+          <ul>
+            <li>生成前做依赖、权限、余额和素材完整性预检</li>
+            <li>失败时保留所有已成功资产和用户配置</li>
+            <li>支持暂停、恢复、单项重试与失败成本说明</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="principles">
+      <p class="eyebrow">05 · Design Principles</p>
+      <h2>同类产品应遵守的三个设计原则</h2>
+      <div class="principles">
+        <article class="principle"><strong>状态先于话术</strong><p>Agent说“已完成”只能是说明；是否完成必须由可验证的资产和统一状态决定。</p></article>
+        <article class="principle"><strong>修改必须可逆</strong><p>任何重生成都应说明影响范围、保存旧版本，并提供恢复路径。</p></article>
+        <article class="principle"><strong>成本必须前置</strong><p>在用户做模型、清晰度和批量决策前，展示预计积分、时间与风险。</p></article>
+      </div>
+    </section>
+
+    <section id="notes">
+      <p class="eyebrow">06 · Your Notes</p>
+      <h2>补充你的现场观察</h2>
+      <div class="notes">
+        <label for="user-notes">补充截图中没有覆盖的点击结果、积分变化或你的不同判断</label>
+        <textarea id="user-notes" placeholder="例如：点击“确定”后实际进入了播放器；修改分镜只扣了多少积分；资产页刷新后恢复……"></textarea>
+        <div class="note-actions">
+          <button class="action-btn primary" type="button" id="save-notes">保存到本机</button>
+          <button class="action-btn" type="button" id="clear-notes">清空</button>
+          <span class="note-status" id="note-status" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">证据范围：OiiOii-拆解图片汇总中的18张页面截图。页面事实、合理推断和尚未确认内容已分别标记；未使用截图文件名替代页面证据。</div>
+  </footer>
+
+  <script>
+    (() => {
+      const filters = [...document.querySelectorAll('.filter-btn')];
+      const issues = [...document.querySelectorAll('.issue-card')];
+
+      filters.forEach((button) => {
+        button.addEventListener('click', () => {
+          const filter = button.dataset.filter;
+          filters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+          issues.forEach((issue) => {
+            issue.hidden = filter !== 'all' && issue.dataset.priority !== filter;
+          });
+        });
+      });
+
+      const notes = document.getElementById('user-notes');
+      const status = document.getElementById('note-status');
+      const storageKey = 'oiioii-journey-issue-notes-v1';
+
+      try { notes.value = localStorage.getItem(storageKey) || ''; } catch (_) {}
+
+      document.getElementById('save-notes').addEventListener('click', () => {
+        try {
+          localStorage.setItem(storageKey, notes.value);
+          status.textContent = '已保存在当前浏览器。';
+        } catch (_) {
+          status.textContent = '浏览器不允许本地保存，请先复制文本。';
+        }
+      });
+
+      document.getElementById('clear-notes').addEventListener('click', () => {
+        notes.value = '';
+        try { localStorage.removeItem(storageKey); } catch (_) {}
+        status.textContent = '已清空。';
+      });
+    })();
+  </script>
+</body>
+</html>

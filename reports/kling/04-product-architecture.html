@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kling AI｜04 产品架构</title><style>
+:root{--ink:#172238;--muted:#667085;--paper:#fff;--bg:#eef2f7;--line:#d7dee8;--navy:#102a43;--blue:#2563eb;--green:#08785b;--green-bg:#e8f7f1;--amber:#946200;--amber-bg:#fff4cf;--orange:#a44d0c;--orange-bg:#fff0e3;--gray:#5f6b7a;--gray-bg:#eef1f5;--red:#b4233a;--red-bg:#fff0f2;--purple:#6d4aff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;overflow-x:hidden;color:var(--ink);background:var(--bg);font:15px/1.68 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.hero{padding:58px clamp(20px,7vw,92px);color:white;background:radial-gradient(circle at 90% 15%,#5e8cff 0,transparent 30%),linear-gradient(135deg,#0b1830,#173d70 65%,#235f99)}.hero .eyebrow{letter-spacing:.12em;text-transform:uppercase;color:#b9d5ff;font-size:12px;font-weight:800}.hero h1{margin:8px 0;font-size:clamp(34px,5vw,60px);line-height:1.08}.hero p{max-width:1050px;color:#deebff}.meta{display:flex;gap:9px;flex-wrap:wrap}.meta span{padding:5px 10px;border:1px solid #ffffff4a;border-radius:999px;background:#ffffff10}.sticky{position:sticky;top:0;z-index:5;display:flex;gap:4px;overflow:auto;padding:9px max(12px,calc((100vw - 1450px)/2));background:#0c1c33f2;backdrop-filter:blur(10px)}.sticky a{flex:0 0 auto;color:#dce9ff;text-decoration:none;padding:7px 10px;border-radius:8px;font-size:12px}.sticky a:hover{background:#ffffff18}main{width:min(1450px,calc(100% - 28px));margin:auto;padding:26px 0 72px}section{margin:20px 0;padding:clamp(20px,3.2vw,38px);background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px #26364d0b}h2{margin:0 0 16px;font-size:clamp(24px,3vw,34px);line-height:1.2}h3{margin:22px 0 9px}h4{margin:15px 0 6px}.lede{font-size:18px;color:#344054}.callout{padding:14px 16px;border-left:4px solid var(--blue);background:#f1f6ff}.riskbox{border-left-color:var(--red);background:var(--red-bg)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.card{padding:16px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe}.card h3{margin-top:0}.table-wrap,.diagram-shell{overflow:auto;border:1px solid var(--line);border-radius:12px;margin:12px 0}.diagram-title{padding:10px 14px;font-weight:800;background:#f3f6fa}.mermaid{min-width:720px;padding:18px;background:#fff;text-align:center}.fallback-note{padding:0 14px;color:var(--muted);font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 11px;vertical-align:top;border-bottom:1px solid var(--line)}th{color:white;background:var(--navy);text-align:left;position:sticky;top:0}tr:nth-child(even) td{background:#fafbfd}.badge{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}.confirmed{color:var(--green);background:var(--green-bg)}.inferred{color:var(--amber);background:var(--amber-bg);border:1px dashed #d6a514}.recommended{color:var(--orange);background:var(--orange-bg)}.unknown{color:var(--gray);background:var(--gray-bg)}.risk{color:var(--red);background:var(--red-bg)}code{padding:2px 6px;border-radius:5px;background:#eef3f8}.source,.prompt{padding:18px;color:#dce8f7;background:#10213b;border-radius:10px;overflow:auto;white-space:pre-wrap;font:12px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace}.prompt{font-size:13px;max-height:none}.lane{display:grid;grid-template-columns:120px 1fr;gap:10px;border-bottom:1px solid var(--line);padding:10px}.lane strong{color:#173d70}.step{display:inline-block;margin:3px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc}.diamond{transform:rotate(45deg);display:inline-grid;place-items:center;width:74px;height:74px;margin:16px 26px;background:#fff8db;border:2px solid #d7a800}.diamond span{transform:rotate(-45deg);font-size:11px;text-align:center}.kpi{font-size:27px;font-weight:850;color:#173d70}.small{color:var(--muted);font-size:12px}a{color:#1f5fbf}details{padding:10px 14px}summary{cursor:pointer;font-weight:700}@media(max-width:700px){main{width:calc(100% - 14px)}section{padding:18px 12px;border-radius:10px}.hero{padding:44px 18px}.lane{grid-template-columns:1fr}.mermaid{min-width:620px}.sticky{padding-left:8px}}
+</style></head>
+<body data-report="product-architecture"><header class="hero"><div class="eyebrow">Evidence-based reverse engineering · 2026-08-19</div><h1>Kling AI｜04 产品架构</h1><p>Kling 以探索社区为流量入口，以 Omni/Generate 承载单次生成，以 Canvas Agent 承载从创意到分镜/素材的项目式工作流；三者共享资产与积分门槛，但登录后状态闭环仍待验证。</p><div class="meta"><span>目标网址：https://kling.ai/app</span><span>目标 Agent：Kling Canvas Agent</span><span>只读证据集</span></div><p class="small">最早用户请求：调用 reverse-ai-product-suite，直接拆解 https://kling.ai/app</p></header><nav class="sticky"><a href="#summary">摘要</a><a href="#evidence">证据</a><a href="#domains">领域</a><a href="#e2e">端到端</a><a href="#layers">九层</a><a href="#relations">关系</a><a href="#context">上下文</a><a href="#knowledge">知识</a><a href="#models">模型</a><a href="#tech">技术能力</a><a href="#entities">实体</a><a href="#sequence">时序</a><a href="#panorama">全景</a><a href="#as-is">As-Is</a><a href="#to-be">To-Be</a><a href="#risks">风险</a><a href="#trace">追踪</a><a href="#unknowns">未知</a></nav><main>
+<section id="summary"><h2>架构论点</h2><p class="lede">Kling 以探索社区为流量入口，以 Omni/Generate 承载单次生成，以 Canvas Agent 承载从创意到分镜/素材的项目式工作流；三者共享资产与积分门槛，但登录后状态闭环仍待验证。</p><p>最早请求：调用 reverse-ai-product-suite，直接拆解 https://kling.ai/app</p></section>
+<section id="evidence"><h2>事实源与缺口</h2><div class="table-wrap"><table><thead><tr><th>证据 ID</th><th>来源</th><th>可见文本（节选）</th><th>UI/对象</th><th>状态</th><th>等级</th></tr></thead><tbody><tr><td><code>K-E01</code></td><td>https://kling.ai/app · 首页</td><td>Explore、Assets、Omni、Generate、Canvas、All Tools；Plans from $6.99</td><td>入口/导航/价格提示</td><td>公开未登录</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E02</code></td><td>https://kling.ai/canvas/home</td><td>Enter your creative idea…；Storyboard、Multi-Angle Storyboard、Product Visuals、Product Advertising Video、Poster Design</td><td>创意输入/模板/My Projects</td><td>输入未提交</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E03</code></td><td>https://kling.ai/app/video/new</td><td>VIDEO 3.0；Add start and end frames；Multi-Shot；720p · 5s · 16:9 · 1；Native Audio</td><td>视频生成表单</td><td>Generate 未点击</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E04</code></td><td>https://kling.ai/app/all-tools</td><td>视频、图像、声音工具矩阵；推荐 VIDEO/IMAGE 3.0 与 Omni</td><td>All Tools</td><td>只读查看</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E05</code></td><td>https://kling.ai/app/omni/new</td><td>上传图片、视频或 Elements；支持参考、修改、重绘、首尾帧；Video/Image Generation</td><td>Omni 多模态输入</td><td>Generate 未点击</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E06</code></td><td>Kling 官方 VIDEO 3.0 Omni 指南</td><td>15s、Native Audio、Multi-shot、元素一致性、视频元素参考、故事板控制</td><td>官方文档</td><td>能力说明</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E07</code></td><td>Kling Credits Policy</td><td>生成时立即扣除 Credits；生成失败退回；$1=66 Credits 标准定价</td><td>计费规则</td><td>规则页</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E08</code></td><td>Kling 登录弹窗</td><td>Continue with Google / Apple / email</td><td>身份门槛</td><td>未登录</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E09</code></td><td>Canvas 页面</td><td>Kling Canvas is upgrading；projects will be migrated to the new version</td><td>迁移提示</td><td>潜在版本/兼容风险</td><td><span class="badge confirmed">已确认（页面事实）</span></td></tr><tr><td><code>K-E10</code></td><td>访问边界</td><td>真实生成、任务结果、预览、导出、失败与中断未触发</td><td>证据限制</td><td>未知</td><td><span class="badge unknown">未知</span></td></tr></tbody></table></div><p><span class="badge unknown">未知</span> 登录后 Canvas 的规划步骤、确认门、任务状态、版本历史、失败/中断恢复、资产写入与导出路径。</p></section>
+<section id="domains"><h2>核心功能域</h2><div class="table-wrap"><table><thead><tr><th>域</th><th>当前能力</th><th>证据等级</th></tr></thead><tbody><tr><td>发现与案例</td><td>首页、模板/案例、社区</td><td>已确认</td></tr><tr><td>创意与 Agent</td><td>对话/项目理解/规划</td><td>已确认能力；执行深度依产品</td></tr><tr><td>媒体生产</td><td>图像、视频、音频、引用、模型参数</td><td>已确认</td></tr><tr><td>编辑与场景</td><td>局部编辑、场景/故事板/成片</td><td>部分确认</td></tr><tr><td>资产与复用</td><td>项目、作品、角色/主体、集合/文件夹</td><td>部分确认</td></tr><tr><td>商业化与治理</td><td>Credits/积分、套餐、权限、安全</td><td>已确认门槛；内部实现未知</td></tr></tbody></table></div></section>
+<section id="e2e"><h2>五流端到端</h2><div class="table-wrap"><table><thead><tr><th>阶段</th><th>用户流</th><th>Agent 控制流</th><th>工具流</th><th>数据/上下文流</th><th>媒体资产流</th></tr></thead><tbody><tr><td>输入</td><td>创意/引用/参数</td><td>完整性判断</td><td>无或读取</td><td>写草稿/引用</td><td>无</td></tr><tr><td>规划</td><td>确认目标</td><td>拆解/路由</td><td>模板/知识</td><td>写计划/会话</td><td>分镜/脚本（如有）</td></tr><tr><td>确认</td><td>接受成本/动作</td><td>停止或继续</td><td>额度检查</td><td>写确认记录</td><td>无</td></tr><tr><td>执行</td><td>等待/中断</td><td>监控任务</td><td>调用模型/编辑</td><td>更新任务状态</td><td>生成版本</td></tr><tr><td>验证</td><td>预览/改稿</td><td>交叉验证/回流</td><td>读取媒体/错误</td><td>写验证与成本</td><td>入库/新版本</td></tr></tbody></table></div></section>
+<section id="layers"><h2>九层架构</h2><div class="table-wrap"><table><thead><tr><th>层</th><th>组件</th><th>等级</th></tr></thead><tbody><tr><td>1 用户/渠道</td><td>Web、社区、项目入口、账号</td><td>已确认</td></tr><tr><td>2 工作台</td><td>生成表单、Canvas/Project、任务、预览、资产</td><td>部分确认</td></tr><tr><td>3 应用</td><td>规划、生成、编辑、场景、角色/主体、组织</td><td>已确认/合理推断</td></tr><tr><td>4 Agent/编排</td><td>Kling Canvas Agent、确认、模型路由、验证</td><td>Agent 确认；编排部分推断</td></tr><tr><td>5 工具/服务</td><td>Text to Video、Image to Video、Image/Subject Reference、Motion Control、Digital Human、Smart Shot Segmentation、Instruction Transformation、Video Reference、Creative Effects、Lip Sync、Custom Model；图像与声音工具另列。</td><td>已确认能力</td></tr><tr><td>6 模型访问</td><td>VIDEO 3.0、VIDEO 3.0 Omni、IMAGE 3.0、IMAGE 3.0 Omni；视频页还显示 720p、5s、16:9、Native Audio 与 Multi‑Shot。</td><td>官方/页面事实</td></tr><tr><td>7 上下文/数据</td><td>项目创意、模板类型、提示词、上传/元素引用、模型与生成参数、任务状态、资产库、积分状态。</td><td>部分确认</td></tr><tr><td>8 知识/公共资产</td><td>模板、案例、风格、模型能力、安全规则</td><td>已确认</td></tr><tr><td>9 基础设施/治理</td><td>身份、权限、计费、审计、隐私、可观测性</td><td>能力需求；实现未知</td></tr></tbody></table></div></section>
+<section id="relations"><h2>Agent / 工具 / 上下文关系</h2><div class="table-wrap"><table><thead><tr><th>源</th><th>关系</th><th>目标</th><th>语义</th><th>证据</th></tr></thead><tbody><tr><td>Kling Canvas Agent</td><td>read</td><td>项目上下文</td><td>当前目标、引用、参数</td><td>部分确认</td></tr><tr><td>Kling Canvas Agent</td><td>call</td><td>模型/工具</td><td>生成/编辑/整理</td><td>能力确认</td></tr><tr><td>任务运行时</td><td>state update</td><td>任务/Agent</td><td>processing/success/failed</td><td>部分确认</td></tr><tr><td>工具</td><td>write</td><td>资产版本</td><td>媒体与元数据</td><td>合理推断</td></tr><tr><td>计费治理</td><td>confirm/settle</td><td>任务</td><td>预估、扣费、退款</td><td>部分确认</td></tr></tbody></table></div></section>
+<section id="context"><h2>类型化全局上下文</h2><div class="table-wrap"><table><thead><tr><th>子上下文</th><th>核心字段</th><th>边界</th></tr></thead><tbody><tr><td>ProjectContext</td><td>project、目标、设置、成员</td><td>项目隔离</td></tr><tr><td>ConversationContext</td><td>session、messages、instructions</td><td>不得跨项目串线</td></tr><tr><td>ReferenceContext</td><td>角色/主体/场景/上传/来源版本</td><td>可追踪引用</td></tr><tr><td>GenerationContext</td><td>模型、提示词、参数、随机性、成本</td><td>提交不可变快照</td></tr><tr><td>TaskContext</td><td>状态、进度、错误、幂等键、中断</td><td>单一状态源</td></tr><tr><td>AssetContext</td><td>资产、版本、依赖、验证、集合</td><td>版本化</td></tr><tr><td>BillingContext</td><td>额度、预估、冻结、结算、退款</td><td>最小披露</td></tr><tr><td>GovernanceContext</td><td>安全、权限、审计、保留期</td><td>私人/公共隔离</td></tr></tbody></table></div></section>
+<section id="knowledge"><h2>知识与资产架构</h2><ul><li>项目数据与复用知识分离：项目提示词/资产不自动成为公共模板。</li><li>角色/主体跨镜头复用需要稳定引用、版本与声音/外观绑定。</li><li>摄影、风格、模型能力与安全/计费规则应版本化并标注来源。</li><li>反馈学习若存在，必须区分私人资产与公共案例；当前实现<span class="badge unknown">未知</span>。</li></ul></section>
+<section id="models"><h2>模型访问与路由</h2><p>VIDEO 3.0、VIDEO 3.0 Omni、IMAGE 3.0、IMAGE 3.0 Omni；视频页还显示 720p、5s、16:9、Native Audio 与 Multi‑Shot。</p><div class="table-wrap"><table><thead><tr><th>路由输入</th><th>路由判断</th><th>输出/约束</th></tr></thead><tbody><tr><td>任务类型</td><td>图像/视频/音频/编辑/引用</td><td>候选模型</td></tr><tr><td>能力需求</td><td>音频、时长、画幅、参考、一致性</td><td>兼容矩阵</td></tr><tr><td>成本与套餐</td><td>Credits/积分/权限</td><td>可用模型与数量</td></tr><tr><td>质量/速度</td><td>极速/质量/专业/广告/剧情</td><td>模式选择</td></tr><tr><td>地区/平台</td><td>Web/PC/区域可用</td><td>功能降级或阻塞</td></tr></tbody></table></div></section>
+<section id="tech"><h2>所需技术能力与技术选项</h2><div class="table-wrap"><table><thead><tr><th>能力</th><th>当前确认</th><th>可选实现类别（非现状）</th></tr></thead><tbody><tr><td>项目状态一致性</td><td>部分</td><td>事务状态机/事件日志</td></tr><tr><td>长任务编排</td><td>任务区/官方状态可见</td><td>队列/工作流引擎（建议类别）</td></tr><tr><td>媒体资产版本</td><td>资产库可见</td><td>对象存储+元数据+依赖图（建议类别）</td></tr><tr><td>模型路由</td><td>模型/模式可见</td><td>能力矩阵与策略路由（建议类别）</td></tr><tr><td>计费与退款</td><td>Credits/积分规则可见</td><td>预估-冻结-结算-退款账本（建议类别）</td></tr><tr><td>全链路追踪</td><td>未知</td><td>trace/span + 任务/资产关联（建议类别）</td></tr></tbody></table></div></section>
+<section id="entities"><h2>核心实体与 ER</h2><div class="table-wrap"><table><thead><tr><th>实体</th><th>关键字段</th><th>事实/推导</th></tr></thead><tbody><tr><td>Project</td><td>id、goal、settings、status</td><td>页面/官方有项目；字段推导</td></tr><tr><td>AgentSession</td><td>project、messages、instructions、state</td><td>Agent/会话证据依产品</td></tr><tr><td>Task</td><td>type、status、model、cost、idempotency</td><td>状态部分确认；字段推导</td></tr><tr><td>Asset/AssetVersion</td><td>type、uri、prompt、deps、validation</td><td>资产确认；版本字段推导</td></tr><tr><td>Character/Subject</td><td>visual_refs、voice_ref、version</td><td>部分确认</td></tr><tr><td>CreditLedger</td><td>estimate、hold、settlement、refund</td><td>规则确认；账本结构建议</td></tr></tbody></table></div><div class="diagram-shell"><div class="diagram-title">ER 图</div><pre class="mermaid">erDiagram
+USER ||--o{ PROJECT : owns
+PROJECT ||--o{ AGENT_SESSION : contains
+PROJECT ||--o{ ASSET : stores
+PROJECT ||--o{ TASK : runs
+AGENT_SESSION ||--o{ MESSAGE : contains
+MESSAGE }o--o{ ASSET : references
+TASK }o--|| MODEL_CONFIG : uses
+TASK ||--o{ ASSET_VERSION : produces
+ASSET ||--o{ ASSET_VERSION : versions
+ASSET }o--o{ COLLECTION : grouped_in
+ASSET }o--o{ CHARACTER_SUBJECT : references
+CREDIT_LEDGER ||--o{ TASK : settles</pre><p class="fallback-note">若图形库未加载，以下 Mermaid 源码即为可读回退。</p><details><summary>Mermaid source / fallback</summary><pre class="source">erDiagram
+USER ||--o{ PROJECT : owns
+PROJECT ||--o{ AGENT_SESSION : contains
+PROJECT ||--o{ ASSET : stores
+PROJECT ||--o{ TASK : runs
+AGENT_SESSION ||--o{ MESSAGE : contains
+MESSAGE }o--o{ ASSET : references
+TASK }o--|| MODEL_CONFIG : uses
+TASK ||--o{ ASSET_VERSION : produces
+ASSET ||--o{ ASSET_VERSION : versions
+ASSET }o--o{ COLLECTION : grouped_in
+ASSET }o--o{ CHARACTER_SUBJECT : references
+CREDIT_LEDGER ||--o{ TASK : settles</pre></details></div></section>
+<section id="sequence"><h2>端到端时序</h2><div class="diagram-shell"><div class="diagram-title">从创意到可验证资产</div><pre class="mermaid">sequenceDiagram
+actor U as 用户
+participant UI as 工作台
+participant A as Kling Canvas Agent
+participant C as 项目上下文
+participant G as 确认/计费门
+participant T as 生成/编辑工具
+participant S as 任务状态
+participant M as 资产库
+U-&gt;&gt;UI: 输入创意/引用/参数
+UI-&gt;&gt;A: call
+A-&gt;&gt;C: read 项目/会话/引用
+A--&gt;&gt;U: 计划与待确认动作
+U-&gt;&gt;G: confirm
+G-&gt;&gt;T: call 模型/工具
+T-&gt;&gt;S: state update
+S--&gt;&gt;A: success/failed
+alt success
+A-&gt;&gt;M: write 资产与版本
+A--&gt;&gt;U: 预览与验证结果
+else failed
+A--&gt;&gt;U: 错误/成本/重试建议
+end</pre><p class="fallback-note">若图形库未加载，以下 Mermaid 源码即为可读回退。</p><details><summary>Mermaid source / fallback</summary><pre class="source">sequenceDiagram
+actor U as 用户
+participant UI as 工作台
+participant A as Kling Canvas Agent
+participant C as 项目上下文
+participant G as 确认/计费门
+participant T as 生成/编辑工具
+participant S as 任务状态
+participant M as 资产库
+U-&gt;&gt;UI: 输入创意/引用/参数
+UI-&gt;&gt;A: call
+A-&gt;&gt;C: read 项目/会话/引用
+A--&gt;&gt;U: 计划与待确认动作
+U-&gt;&gt;G: confirm
+G-&gt;&gt;T: call 模型/工具
+T-&gt;&gt;S: state update
+S--&gt;&gt;A: success/failed
+alt success
+A-&gt;&gt;M: write 资产与版本
+A--&gt;&gt;U: 预览与验证结果
+else failed
+A--&gt;&gt;U: 错误/成本/重试建议
+end</pre></details></div></section>
+<section id="panorama"><h2>分层全景</h2><div class="diagram-shell"><div class="diagram-title">九层产品全景（实线确认主干；虚线推断）</div><pre class="mermaid">flowchart TB
+subgraph L1[1 用户与渠道]
+U[用户]:::confirmed --&gt; WEB[Web/社区/项目入口]:::confirmed
+end
+subgraph L2[2 工作台]
+WB[生成器/Canvas/Project/Assets]:::confirmed
+end
+subgraph L3[3 应用域]
+PLAN[创意规划]:::confirmed
+GEN[媒体生成]:::confirmed
+EDIT[编辑与场景]:::inferred
+ORG[资产组织]:::confirmed
+end
+subgraph L4[4 Agent/编排]
+A[Kling Canvas Agent]:::confirmed
+ORCH[确认/路由/验证]:::inferred
+end
+subgraph L5[5 工具与服务]
+TOOLS[图像/视频/音频/引用/工具]:::confirmed
+end
+subgraph L6[6 模型访问]
+MODELS[模型选择与能力矩阵]:::confirmed
+end
+subgraph L7[7 全局上下文与数据]
+CTX[(Project/Session/Prompt/Refs/Task/Asset/Credit)]:::inferred
+end
+subgraph L8[8 知识与公共资产]
+KNOW[模板/案例/模型知识/风格]:::confirmed
+end
+subgraph L9[9 基础设施与治理]
+GOV[身份/安全/计费/审计/隐私]:::inferred
+end
+WEB --&gt; WB
+WB --&gt; PLAN
+PLAN --&gt; A
+A --&gt; ORCH
+ORCH --&gt;|call| TOOLS
+TOOLS --&gt;|route| MODELS
+A -. read/write .-&gt; CTX
+KNOW -. read .-&gt; A
+GOV -. enforce .-&gt; ORCH
+ORCH --&gt;|asset/state| ORG
+classDef confirmed fill:#e8f7f1,stroke:#08785b,color:#123;
+classDef inferred fill:#fff4cf,stroke:#946200,stroke-dasharray:5 3,color:#123;
+classDef risk fill:#fff0f2,stroke:#b4233a,color:#123;</pre><p class="fallback-note">若图形库未加载，以下 Mermaid 源码即为可读回退。</p><details><summary>Mermaid source / fallback</summary><pre class="source">flowchart TB
+subgraph L1[1 用户与渠道]
+U[用户]:::confirmed --&gt; WEB[Web/社区/项目入口]:::confirmed
+end
+subgraph L2[2 工作台]
+WB[生成器/Canvas/Project/Assets]:::confirmed
+end
+subgraph L3[3 应用域]
+PLAN[创意规划]:::confirmed
+GEN[媒体生成]:::confirmed
+EDIT[编辑与场景]:::inferred
+ORG[资产组织]:::confirmed
+end
+subgraph L4[4 Agent/编排]
+A[Kling Canvas Agent]:::confirmed
+ORCH[确认/路由/验证]:::inferred
+end
+subgraph L5[5 工具与服务]
+TOOLS[图像/视频/音频/引用/工具]:::confirmed
+end
+subgraph L6[6 模型访问]
+MODELS[模型选择与能力矩阵]:::confirmed
+end
+subgraph L7[7 全局上下文与数据]
+CTX[(Project/Session/Prompt/Refs/Task/Asset/Credit)]:::inferred
+end
+subgraph L8[8 知识与公共资产]
+KNOW[模板/案例/模型知识/风格]:::confirmed
+end
+subgraph L9[9 基础设施与治理]
+GOV[身份/安全/计费/审计/隐私]:::inferred
+end
+WEB --&gt; WB
+WB --&gt; PLAN
+PLAN --&gt; A
+A --&gt; ORCH
+ORCH --&gt;|call| TOOLS
+TOOLS --&gt;|route| MODELS
+A -. read/write .-&gt; CTX
+KNOW -. read .-&gt; A
+GOV -. enforce .-&gt; ORCH
+ORCH --&gt;|asset/state| ORG
+classDef confirmed fill:#e8f7f1,stroke:#08785b,color:#123;
+classDef inferred fill:#fff4cf,stroke:#946200,stroke-dasharray:5 3,color:#123;
+classDef risk fill:#fff0f2,stroke:#b4233a,color:#123;</pre></details></div></section>
+<section id="as-is"><h2>As-Is</h2><ul><li><span class="badge confirmed">已确认（页面事实）</span> 多入口、Agent/生成器、模型与工具、资产/项目、积分/套餐共同构成产品。</li><li><span class="badge inferred">合理推断</span> Agent 通过项目上下文路由模型/工具并写回任务与资产。</li><li><span class="badge unknown">未知</span> 后端语言、数据库、消息队列、云厂商、动态路由策略与真实 Prompt。</li></ul></section>
+<section id="to-be"><h2>To-Be 建议</h2><ol><li>统一任务/资产/对话的状态源，完成门必须验证任务、媒体和资产。</li><li>生成前验证时长、风格、对白、音频/视频、引用与模型兼容。</li><li>依赖图支持上游修改失效与局部重算。</li><li>所有重试幂等；重复请求不重复计费或生成资产。</li><li>积分采用预估、冻结、结算、失败退款的可解释流程。</li><li>中断向 Agent、工具、任务、计费传播。</li><li>全链路追踪连接会话、工具、任务、资产和成本。</li><li>模型效果反馈与版本绑定；私人资产严格隔离。</li></ol></section>
+<section id="risks"><h2>优先风险</h2><div class="table-wrap"><table><thead><tr><th>优先级</th><th>风险</th><th>后果</th><th>缓解</th></tr></thead><tbody><tr><td>P0</td><td>对话完成与资产完成不一致</td><td>用户误判任务成功</td><td>可验证完成门</td></tr><tr><td>P0</td><td>重试重复扣费/重复资产</td><td>财务与状态污染</td><td>幂等键+账本</td></tr><tr><td>P1</td><td>引用修改未使下游失效</td><td>角色/主体不一致</td><td>依赖图+局部重算</td></tr><tr><td>P1</td><td>模型能力/套餐/地区变化</td><td>生成失败或降级</td><td>版本化能力矩阵</td></tr><tr><td>P1</td><td>私人资产跨项目/公共案例泄露</td><td>隐私风险</td><td>隔离、最小权限、审计</td></tr></tbody></table></div></section>
+<section id="trace"><h2>组件—证据追踪</h2><div class="table-wrap"><table><thead><tr><th>组件</th><th>证据</th><th>等级</th><th>置信度</th></tr></thead><tbody><tr><td>Kling Canvas Agent</td><td>K-E02 K-E09</td><td>已确认角色</td><td>高</td></tr><tr><td>模型与工具</td><td>VIDEO 3.0、VIDEO 3.0 Omni、IMAGE 3.0、IMAGE 3.0 Omni；视频页还显示 720p、5s、16:9、Native Audio 与 Multi‑Shot。</td><td>页面/官方</td><td>高</td></tr><tr><td>任务状态</td><td>共享证据台账</td><td>部分确认</td><td>中</td></tr><tr><td>资产版本/依赖</td><td>架构推导</td><td>建议设计</td><td>中</td></tr><tr><td>计费账本</td><td>政策/价格 + 结构推导</td><td>部分确认/建议</td><td>中</td></tr><tr><td>基础设施供应商</td><td>无</td><td>未知</td><td>低</td></tr></tbody></table></div></section>
+<section id="unknowns"><h2>未解决问题</h2><p class="callout riskbox">登录后 Canvas 的规划步骤、确认门、任务状态、版本历史、失败/中断恢复、资产写入与导出路径。</p></section></main>
+<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';try{mermaid.initialize({startOnLoad:true,securityLevel:'strict',theme:'neutral'})}catch(e){document.querySelectorAll('.fallback-note').forEach(x=>x.style.display='block')}</script></body></html>

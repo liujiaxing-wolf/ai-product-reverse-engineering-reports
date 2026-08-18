@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>OiiOii 创作流程｜Agent 契约拆解</title>
+  <style>
+    :root {
+      --ink: #132238;
+      --muted: #667085;
+      --line: #d7dee8;
+      --soft: #f4f7fb;
+      --paper: #ffffff;
+      --navy: #18345b;
+      --blue: #2869d8;
+      --purple: #7650c7;
+      --yellow: #b88005;
+      --orange: #d25a2a;
+      --cyan: #07858c;
+      --green: #18815a;
+      --red: #ba3d45;
+      --fact-bg: #e9f7f0;
+      --infer-bg: #fff4d9;
+      --unknown-bg: #eef1f5;
+      --shadow: 0 10px 30px rgba(24, 52, 91, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #edf2f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.65;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      padding: 10px clamp(18px, 4vw, 56px);
+      color: #fff; background: rgba(19, 34, 56, .96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .brand { font-weight: 760; letter-spacing: .02em; white-space: nowrap; }
+    .nav { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+    .nav a { text-decoration: none; font-size: 12px; color: #dce7f6; padding: 6px 9px; border-radius: 7px; }
+    .nav a:hover { color: white; background: rgba(255,255,255,.1); }
+    .hero {
+      padding: 72px clamp(20px, 6vw, 88px) 60px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 76% 20%, rgba(73, 138, 255, .35), transparent 32%),
+        linear-gradient(135deg, #11223b 0%, #193d6f 58%, #285da4 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: #9fc1ee; font-size: 13px; font-weight: 720; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(32px, 5vw, 62px); line-height: 1.12; letter-spacing: -.03em; }
+    .hero p { max-width: 900px; margin: 20px 0 0; color: #dbe7f6; font-size: clamp(15px, 1.8vw, 19px); }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .hero-meta span { padding: 7px 11px; border: 1px solid rgba(255,255,255,.22); border-radius: 7px; background: rgba(255,255,255,.07); font-size: 13px; }
+    main { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 80px; }
+    section { margin: 26px 0; padding: clamp(22px, 4vw, 42px); background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    h2 { margin: 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.2; letter-spacing: -.02em; }
+    h3 { margin: 0; font-size: 20px; line-height: 1.35; }
+    h4 { margin: 0; font-size: 15px; }
+    .section-no { color: var(--blue); font-size: 13px; font-weight: 800; letter-spacing: .1em; }
+    .lead, .note { color: var(--muted); }
+    .lead { max-width: 920px; margin: 8px 0 0; }
+    .callout { padding: 16px 18px; border-left: 4px solid var(--blue); background: #edf4ff; }
+    .callout.warning { border-color: var(--yellow); background: #fff8e7; }
+    .callout.danger { border-color: var(--red); background: #fff0f1; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+    .metric { padding: 18px; border: 1px solid var(--line); background: var(--soft); }
+    .metric strong { display: block; font-size: 29px; line-height: 1; color: var(--navy); }
+    .metric span { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; }
+    .badge, .tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 720; white-space: nowrap;
+    }
+    .badge.fact { color: #0c6143; background: var(--fact-bg); }
+    .badge.infer { color: #805a00; background: var(--infer-bg); }
+    .badge.unknown { color: #586273; background: var(--unknown-bg); }
+    .tag { color: #29496e; background: #eaf1fa; font-weight: 650; }
+    .evidence-ref { color: #1e5eb7; font-size: 12px; font-weight: 760; white-space: nowrap; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { position: sticky; top: 0; z-index: 1; color: #fff; background: var(--navy); text-align: left; }
+    th, td { padding: 11px 12px; vertical-align: top; border-bottom: 1px solid var(--line); }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(even) { background: #fafbfd; }
+    td ul { margin: 0; padding-left: 17px; }
+    .agents-strip { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+    .agent-mini { min-width: 140px; padding: 14px; border-top: 5px solid var(--agent); background: var(--soft); }
+    .agent-mini .seq { color: var(--muted); font-size: 11px; }
+    .agent-mini strong { display: block; margin: 4px 0; font-size: 16px; }
+    .agent-mini small { color: var(--muted); }
+    .edge-key { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 14px; color: var(--muted); font-size: 12px; }
+    .edge-key span::before { content: ""; display: inline-block; width: 28px; margin-right: 7px; vertical-align: 4px; border-top: 2px solid var(--green); }
+    .edge-key .inferred::before { border-top-style: dashed; border-color: var(--yellow); }
+    .edge-key .unknown::before { border-top-style: dotted; border-color: #8a94a4; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+    .filter {
+      padding: 8px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer;
+    }
+    .filter[aria-pressed="true"] { color: #fff; border-color: var(--navy); background: var(--navy); }
+    .contract-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .contract { border: 1px solid var(--line); border-top: 6px solid var(--agent); background: #fff; }
+    .contract-head { padding: 20px 22px 15px; background: linear-gradient(180deg, #f8fafe, #fff); }
+    .contract-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .contract-title h3 { color: var(--agent); font-size: 24px; }
+    .contract-summary { margin: 8px 0 0; color: var(--muted); }
+    .contract details { border-top: 1px solid var(--line); }
+    .contract summary { cursor: pointer; list-style: none; padding: 13px 20px; font-weight: 750; background: #fbfcfe; }
+    .contract summary::-webkit-details-marker { display: none; }
+    .contract summary::after { content: "+"; float: right; color: var(--muted); }
+    .contract details[open] summary::after { content: "−"; }
+    .detail-body { padding: 3px 20px 18px; }
+    .detail-body p { margin: 8px 0; }
+    .detail-body ul { margin: 8px 0; padding-left: 19px; }
+    .io-group { margin: 9px 0; padding: 11px 12px; background: var(--soft); border-left: 3px solid var(--agent); }
+    .io-group strong { display: block; margin-bottom: 4px; }
+    .mini-table { font-size: 12px; }
+    .mini-table th { position: static; background: #edf2f8; color: var(--ink); }
+    .contract[data-hidden="true"] { display: none; }
+    .flow-shell { overflow-x: auto; padding: 8px 0 18px; }
+    .flow-board { min-width: 1320px; border: 1px solid var(--line); background: #fbfcfe; }
+    .lane-labels { display: grid; grid-template-columns: 96px repeat(8, 1fr); background: var(--navy); color: white; }
+    .lane-labels div { padding: 10px; border-right: 1px solid rgba(255,255,255,.12); font-size: 12px; font-weight: 720; text-align: center; }
+    .lane { display: grid; grid-template-columns: 96px repeat(8, 1fr); min-height: 142px; border-bottom: 1px solid var(--line); }
+    .lane:last-child { border-bottom: 0; }
+    .lane-name { display: flex; align-items: center; justify-content: center; padding: 10px; color: var(--navy); background: #eaf0f8; font-weight: 800; writing-mode: vertical-rl; letter-spacing: .12em; }
+    .flow-cell { position: relative; display: flex; align-items: center; justify-content: center; padding: 18px 11px; border-left: 1px dashed #dce2eb; }
+    .flow-cell:not(:last-child)::after { content: "→"; position: absolute; right: -8px; z-index: 2; color: #93a0b3; font-weight: 800; }
+    .node { width: 100%; padding: 10px; border: 1px solid #bdc9d8; border-radius: 8px; background: #fff; box-shadow: 0 4px 12px rgba(32,50,78,.06); text-align: center; font-size: 12px; }
+    .node strong { display: block; font-size: 13px; }
+    .node .evidence-ref { display: block; margin-top: 5px; }
+    .node.fact-node { border-color: #8fc9b1; background: #f0faf5; }
+    .node.infer-node { border-color: #e6c66e; background: #fff9e9; border-style: dashed; }
+    .node.unknown-node { border-color: #aeb7c4; background: #f3f5f8; border-style: dotted; }
+    .decision-wrap { width: 92px; height: 92px; display: flex; align-items: center; justify-content: center; }
+    .decision { width: 68px; height: 68px; transform: rotate(45deg); border: 2px solid var(--yellow); background: #fff7dc; }
+    .decision > div { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 5px; transform: rotate(-45deg); text-align: center; font-size: 11px; font-weight: 780; line-height: 1.2; }
+    .branch-section { margin-top: 24px; }
+    .branch { display: grid; grid-template-columns: 180px repeat(5, minmax(150px, 1fr)); gap: 10px; align-items: center; margin: 10px 0; padding: 12px; border: 1px solid var(--line); background: #fbfcfe; overflow-x: auto; }
+    .branch-title { font-weight: 800; color: var(--navy); }
+    .branch .arrow { text-align: center; color: var(--muted); font-size: 18px; }
+    .boundary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+    .boundary { padding: 14px; border: 1px solid var(--line); background: var(--soft); }
+    .boundary strong { color: var(--navy); }
+    .tri-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .tri-card { padding: 18px; border-top: 4px solid; background: var(--soft); }
+    .tri-card.fact { border-color: var(--green); }
+    .tri-card.infer { border-color: var(--yellow); }
+    .tri-card.unknown { border-color: #8993a3; }
+    .tri-card ol, .tri-card ul { margin-bottom: 0; padding-left: 20px; }
+    .validation-list { counter-reset: validate; display: grid; gap: 10px; padding: 0; list-style: none; }
+    .validation-list li { counter-increment: validate; display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 15px; border: 1px solid var(--line); background: var(--soft); }
+    .validation-list li::before { content: counter(validate); display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; color: #fff; background: var(--navy); font-weight: 850; border-radius: 50%; }
+    footer { padding: 28px; color: #748096; text-align: center; font-size: 12px; }
+    .print-only { display: none; }
+    @media (max-width: 980px) {
+      .summary-grid, .tri-grid, .boundary-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .contract-grid { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; }
+      .nav { display: none; }
+    }
+    @media (max-width: 620px) {
+      main { width: min(100% - 18px, 1500px); }
+      section { padding: 20px 15px; }
+      .hero { padding: 54px 18px 42px; }
+      .summary-grid, .tri-grid, .boundary-grid { grid-template-columns: 1fr; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      .contract-head, .contract summary, .detail-body { padding-left: 15px; padding-right: 15px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11px; }
+      .topbar, .toolbar { display: none; }
+      .hero { padding: 34px; }
+      main { width: 100%; padding: 0; }
+      section { break-inside: avoid; box-shadow: none; margin: 10px 0; }
+      .contract-grid { grid-template-columns: 1fr; }
+      .contract details { display: block; }
+      .contract details > * { display: block; }
+      .print-only { display: inline; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">OiiOii · Agent 契约拆解</div>
+    <nav class="nav" aria-label="页面目录">
+      <a href="#scope">范围</a><a href="#agents">Agent 清单</a><a href="#contracts">I/O 契约</a>
+      <a href="#tools">工具</a><a href="#context">上下文</a><a href="#dataflow">数据流</a>
+      <a href="#flow">流程图</a><a href="#claims">证据分级</a><a href="#validate">待验证</a>
+    </nav>
+  </header>
+
+  <header class="hero">
+    <p class="eyebrow">Product Forensics · Evidence-first</p>
+    <h1>从真实页面记录反推<br>OiiOii 的 Agent 契约</h1>
+    <p>本报告只描述用户可观察到的 Agent 输入、功能判断、页面/资产结果、上下文读写迹象与交接关系。它不是隐藏思维链还原，也不是完整 System Prompt。</p>
+    <div class="hero-meta">
+      <span>18 张流程截图</span><span>7 个可见 Agent 名称</span><span>6 个有直接产出证据的专业角色</span><span>证据等级：事实 / 推断 / 未知</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="scope">
+      <div class="section-head"><div><div class="section-no">01 · SCOPE</div><h2>查看范围与证据缺口</h2><p class="lead">按文件夹分组从 S01 到 S18 查看需求配置、剧本、角色、场景、道具、分镜、视频与最终预览状态；截图编号沿用原文件名。</p></div></div>
+      <div class="summary-grid">
+        <div class="metric"><strong>18</strong><span>已查看截图总数</span></div>
+        <div class="metric"><strong>7</strong><span>页面出现的 Agent 名称</span></div>
+        <div class="metric"><strong>1</strong><span>唯一明确展示的 Agent→Agent 邀请</span></div>
+        <div class="metric"><strong>0</strong><span>已验证的最终合成视频</span></div>
+      </div>
+      <div class="callout warning"><strong>证据边界：</strong>“思考完成”“规划完成”只作为对用户公开的判断摘要；Agent 的计划语句不等于工具已经执行。只有可见资产、状态变化、工具结果或页面结果才记为已发生。</div>
+      <div class="table-wrap" style="margin-top:18px">
+        <table>
+          <thead><tr><th>证据编号</th><th>截图</th><th>可直接看到的页面证据</th><th>本报告用途</th></tr></thead>
+          <tbody>
+            <tr><td><b>EV01</b></td><td>S01 / S11</td><td>用户原始现代言情短剧需求；“艺术总监”“规划完成”；活动项“激活工作流”“更新短片参数”；“影片长度”；风格“3D言情”。</td><td>初始输入、艺术总监触发与配置写入迹象。</td></tr>
+            <tr><td><b>EV02</b></td><td>S02</td><td>“编剧”阶段的公开判断摘要；按钮“满意，请继续”“我要修改”。</td><td>剧本确认门、纠偏入口。</td></tr>
+            <tr><td><b>EV03</b></td><td>S03</td><td>许清和、顾砚、江叙白三张角色图与角色卡；满意/修改入口。</td><td>角色资产、用户确认。</td></tr>
+            <tr><td><b>EV04</b></td><td>S04</td><td>用户点击“生成道具”；页面提示场景多视图缺失，需先补齐；提到协议与钢笔等关键道具。</td><td>前置依赖检查、阻塞与修复计划。</td></tr>
+            <tr><td><b>EV05</b></td><td>S05</td><td>Seedance 2.0、Pro/Fast、720p/480p、自定义音色条件，以及“不生成分镜图”等配置。</td><td>分镜/视频配置输入。</td></tr>
+            <tr><td><b>EV06</b></td><td>S06</td><td>首个样片分镜视频可见；用户选择“满意，请继续”。</td><td>样片确认门与批量生成触发。</td></tr>
+            <tr><td><b>EV07</b></td><td>S07</td><td>四张分镜视频卡；播放、编辑、删除；“预览最终视频”“去剪辑”“下载所有分镜”。</td><td>视频资产与后续入口。</td></tr>
+            <tr><td><b>EV08</b></td><td>S08</td><td>警告“分镜视频、音效、BGM等素材未完全生成”；取消/确认。</td><td>最终预览前完整性检查。</td></tr>
+            <tr><td><b>EV09</b></td><td>S09</td><td>资产库显示“这里还什么都没有”。</td><td>聊天/画布/资产库状态不一致。</td></tr>
+            <tr><td><b>EV10</b></td><td>S10</td><td>画布“我的剧本”资产，含“豪华包厢”等场景正文。</td><td>编剧真实资产写入。</td></tr>
+            <tr><td><b>EV11</b></td><td>S01、S12–S15</td><td>画布可见“编剧、角色设计师、场景设计师、道具设计师、分镜师”等彩色角色标签；S12–S15 的文件名描述不能代替页面事实。</td><td>Agent 名称；排除仅凭文件名认定交接。</td></tr>
+            <tr><td><b>EV12</b></td><td>S16</td><td>道具主图完成摘要；角色/场景/道具“均已准备就绪”；“@道具设计师 邀请 @分镜师 加入了群聊”。</td><td>唯一明确的 Agent 交接。</td></tr>
+            <tr><td><b>EV13</b></td><td>S17</td><td>分镜师提取 4 个镜头并生成画面、声音、对白提示；公开的“觉醒”运镜知识摘要；首个样片/全部生成选择。</td><td>分镜判断、提示词与知识使用迹象。</td></tr>
+            <tr><td><b>EV14</b></td><td>S18</td><td>其余第 2/3/4 个分镜视频陆续出现，任务过程状态仍可见。</td><td>同一分镜师重复执行与批量结果。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout danger" style="margin-top:18px"><strong>无法访问或无法确认：</strong>隐藏思维链、真实工具函数名/参数、服务端日志、Agent 内存、项目 JSON、资产稳定 ID、版本图、费用扣减、内容安全日志、失败重试日志、最终合成视频播放结果。S12–S15 文件名中的“加入/交接”描述不视作页面直接证据。</div>
+    </section>
+
+    <section id="agents">
+      <div class="section-head"><div><div class="section-no">02 · AGENT INVENTORY</div><h2>Agent 清单</h2><p class="lead">不预设固定数量。页面共出现 7 个名称，其中 6 个专业角色有可见阶段结果；“Oii Agent”能确认是会话/任务界面身份，能否独立执行编排仍未知。</p></div></div>
+      <div class="agents-strip" id="agentStrip"></div>
+      <div class="edge-key"><span>页面明确交接</span><span class="inferred">按时间与资产依赖推断</span><span class="unknown">未能确认</span></div>
+      <div class="table-wrap" style="margin-top:18px">
+        <table id="agentInventory"><thead><tr><th>顺序</th><th>Agent</th><th>首次出现/触发</th><th>可确认产出</th><th>上游与下游</th><th>是否重入</th><th>证据等级</th></tr></thead><tbody></tbody></table>
+      </div>
+      <p class="note">未发现有证据支持的独立“视频生成 Agent”“音频 Agent”“剪辑 Agent”。当前样本中，分镜师直接承接了提示词、样片与批量分镜视频；这不证明产品在其他场景中不存在上述 Agent。</p>
+    </section>
+
+    <section id="contracts">
+      <div class="section-head"><div><div class="section-no">03 · I/O CONTRACTS</div><h2>每个 Agent 的 I/O 契约卡</h2><p class="lead">每张卡都按 10 个固定维度拆解。工具名带“功能命名”时，仅表示页面可观察到的能力，不是官方函数名。</p></div></div>
+      <div class="toolbar" role="group" aria-label="筛选 Agent 类型">
+        <button class="filter" type="button" data-filter="all" aria-pressed="true">全部</button>
+        <button class="filter" type="button" data-filter="specialist" aria-pressed="false">专业执行 Agent</button>
+        <button class="filter" type="button" data-filter="shell" aria-pressed="false">界面/编排身份</button>
+      </div>
+      <div class="contract-grid" id="contractGrid"></div>
+    </section>
+
+    <section id="tools">
+      <div class="section-head"><div><div class="section-no">04 · TOOL CATALOG</div><h2>工具总表</h2><p class="lead">除页面直接显示的活动名称外，均使用“功能命名，并非官方工具名”。“公开计划”与“执行结果”分栏，避免把口头计划误记为调用成功。</p></div></div>
+      <div class="table-wrap"><table id="toolTable"><thead><tr><th>ID</th><th>功能名称</th><th>主要 Agent</th><th>输入</th><th>可见结果</th><th>确认状态</th><th>证据</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="context">
+      <div class="section-head"><div><div class="section-no">05 · GLOBAL CONTEXT</div><h2>全局上下文字段表</h2><p class="lead">“字段名”是分析用语义名称，并非已读取到后台 schema。读者应重点看生产者、潜在消费者、当前可见状态和证据缺口。</p></div></div>
+      <div class="table-wrap"><table id="contextTable"><thead><tr><th>字段/对象（语义命名）</th><th>页面可见值</th><th>生产者</th><th>可能消费者</th><th>读写迹象</th><th>版本/一致性</th><th>等级与证据</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="dataflow">
+      <div class="section-head"><div><div class="section-no">06 · PRODUCER → CONSUMER</div><h2>数据生产者—消费者关系表</h2><p class="lead">只有道具设计师→分镜师的邀请被页面明确展示；其余交接多由时序、资产依赖与画布组织关系推断。</p></div></div>
+      <div class="table-wrap"><table id="dataflowTable"><thead><tr><th>生产者</th><th>数据/资产</th><th>消费者</th><th>使用方式</th><th>用户门控</th><th>上游修改后的失效/重跑</th><th>证据</th></tr></thead><tbody></tbody></table></div>
+      <div class="callout warning" style="margin-top:18px"><strong>数据治理风险：</strong>画布上可见连接关系不等于已确认存在稳定引用 ID；资产库为空、聊天“正在生成”、画布已有结果三者可能不同步。当前证据无法判断“单一真相源”究竟是聊天、任务状态、画布还是资产库。</div>
+    </section>
+
+    <section id="flow">
+      <div class="section-head"><div><div class="section-no">07 · FLOW</div><h2>Agent 输入—判断—工具—输出—交接流程图</h2><p class="lead">三条泳道分别为用户、产品界面、系统结果。绿色为页面事实，黄色虚线为合理推断，灰色点线为尚未确认。</p></div></div>
+      <div class="flow-shell" aria-label="正常主流程三泳道图">
+        <div class="flow-board">
+          <div class="lane-labels"><div>泳道 / 阶段</div><div>1 需求</div><div>2 参数与剧本</div><div>3 角色</div><div>4 场景依赖</div><div>5 道具与交接</div><div>6 分镜方案</div><div>7 样片</div><div>8 批量与预览</div></div>
+          <div class="lane">
+            <div class="lane-name">用户</div>
+            <div class="flow-cell"><div class="node fact-node"><strong>想生成现代言情短剧</strong>提交完整故事梗概<span class="evidence-ref">EV01</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>确认或修改剧本</strong>“满意，请继续” / “我要修改”<span class="evidence-ref">EV02</span></div></div>
+            <div class="flow-cell"><div class="decision-wrap"><div class="decision"><div>角色结果<br>满意？<br>EV03</div></div></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>希望继续生成道具</strong>点击“生成道具”<span class="evidence-ref">EV04</span></div></div>
+            <div class="flow-cell"><div class="node infer-node"><strong>接受阶段继续</strong>具体确认动作未完整截取<span class="evidence-ref">EV12</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>选择生成方案</strong>模型、模式、分辨率、不生成分镜图<span class="evidence-ref">EV05</span></div></div>
+            <div class="flow-cell"><div class="decision-wrap"><div class="decision"><div>样片<br>满意？<br>EV06</div></div></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>选择下一步</strong>预览 / 剪辑 / 下载<span class="evidence-ref">EV07–08</span></div></div>
+          </div>
+          <div class="lane">
+            <div class="lane-name">产品界面</div>
+            <div class="flow-cell"><div class="node fact-node"><strong>Oii Agent 会话接收</strong>展示艺术总监回复<span class="evidence-ref">EV01</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>参数/剧本确认组件</strong>活动项、风格、剧本卡、双按钮<span class="evidence-ref">EV01–02</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>角色结果卡</strong>3 张角色图与修改入口<span class="evidence-ref">EV03</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>显示前置阻塞</strong>场景多视图缺失，先补齐<span class="evidence-ref">EV04</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>明确邀请下一 Agent</strong>道具设计师→分镜师<span class="evidence-ref">EV12</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>方案与提示词</strong>4 镜头；先样片/全部生成<span class="evidence-ref">EV05、EV13</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>样片确认按钮</strong>满意继续后进入批量<span class="evidence-ref">EV06</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>4 视频卡 + 完整性警告</strong>音效/BGM 未完全生成<span class="evidence-ref">EV07–08</span></div></div>
+          </div>
+          <div class="lane">
+            <div class="lane-name">系统结果</div>
+            <div class="flow-cell"><div class="node infer-node"><strong>Oii Agent 路由</strong>是否独立编排未知<span class="evidence-ref">EV01</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>艺术总监 → 编剧</strong>参数活动完成；剧本资产出现<span class="evidence-ref">EV01、EV10</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>角色设计师</strong>写入 3 个角色视觉资产<span class="evidence-ref">EV03、EV11</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>场景设计师检查依赖</strong>检测到多视图缺口；修复完成仅可推断<span class="evidence-ref">EV04、EV12</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>道具设计师</strong>3 个道具资产；显式交接分镜师<span class="evidence-ref">EV12</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>分镜师</strong>4 镜头提示，含画面/声音/对白<span class="evidence-ref">EV13</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>分镜师生成样片</strong>用户满意后再次执行<span class="evidence-ref">EV06</span></div></div>
+            <div class="flow-cell"><div class="node fact-node"><strong>分镜师生成其余视频</strong>最终合成仍未证实完成<span class="evidence-ref">EV14、EV08</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="branch-section">
+        <h3>分支路径</h3>
+        <div class="branch">
+          <div class="branch-title">修改 / 纠偏<br><span class="badge fact">入口是事实</span></div>
+          <div class="decision-wrap"><div class="decision"><div>满意 /<br>不满意？<br>EV02/03/06</div></div></div><div class="arrow">→</div>
+          <div class="node fact-node">不满意：点“我要修改”或编辑卡片</div><div class="arrow">→</div>
+          <div class="node unknown-node">对应 Agent 是否重跑、旧资产是否失效：未知</div>
+        </div>
+        <div class="branch">
+          <div class="branch-title">前置依赖失败<br><span class="badge fact">已观察</span></div>
+          <div class="decision-wrap"><div class="decision"><div>多视图<br>齐全 / 缺失？<br>EV04</div></div></div><div class="arrow">→</div>
+          <div class="node fact-node">缺失：暂停道具流程并说明先补齐</div><div class="arrow">→</div>
+          <div class="node infer-node">补齐成功后继续道具；精确状态写入未知<br><span class="evidence-ref">EV12</span></div>
+        </div>
+        <div class="branch">
+          <div class="branch-title">生成失败 / 余额不足<br><span class="badge unknown">未观察</span></div>
+          <div class="decision-wrap"><div class="decision" style="border-color:#8a94a4;background:#f3f5f8"><div>生成成功 /<br>生成失败？</div></div></div><div class="arrow">→</div>
+          <div class="decision-wrap"><div class="decision" style="border-color:#8a94a4;background:#f3f5f8"><div>余额充足 /<br>余额不足？</div></div></div><div class="arrow">→</div>
+          <div class="node unknown-node">错误解释、重试、退款、资产保留策略均未知</div>
+        </div>
+        <div class="branch">
+          <div class="branch-title">继续 / 中断<br><span class="badge unknown">未观察</span></div>
+          <div class="decision-wrap"><div class="decision" style="border-color:#8a94a4;background:#f3f5f8"><div>继续 /<br>中断？</div></div></div><div class="arrow">→</div>
+          <div class="node unknown-node">中断事件是否写入任务状态未知</div><div class="arrow">→</div>
+          <div class="node unknown-node">恢复入口、断点续跑、重复扣费策略未知</div>
+        </div>
+      </div>
+
+      <div class="boundary-grid">
+        <div class="boundary"><strong>艺术总监边界</strong><br>可确认配置工作流与短片参数；无法确认它是否负责最终创意质量审核。</div>
+        <div class="boundary"><strong>编剧边界</strong><br>可确认产出剧本资产；未看到角色图或视频生成行为。</div>
+        <div class="boundary"><strong>角色 / 场景 / 道具边界</strong><br>分别产出对应视觉资产；场景负责前置完整性判断，道具可显式邀请分镜师。</div>
+        <div class="boundary"><strong>分镜师边界</strong><br>本样本中覆盖镜头拆分、提示词、样片和批量视频；音效/BGM与最终合成没有完成证据。</div>
+        <div class="boundary"><strong>Oii Agent 边界</strong><br>确定是会话/任务界面身份；独立路由、共享内存和状态机职责未证实。</div>
+        <div class="boundary"><strong>未出现的角色</strong><br>不能据此断言存在视频、音频、剪辑或质检 Agent；当前只能记录为未知。</div>
+      </div>
+    </section>
+
+    <section id="claims">
+      <div class="section-head"><div><div class="section-no">08 · CLAIM REGISTER</div><h2>事实、推断和未知事项清单</h2></div></div>
+      <div class="tri-grid">
+        <article class="tri-card fact"><h3>页面事实</h3><ul>
+          <li>艺术总监、编剧、角色设计师、场景设计师、道具设计师、分镜师及 Oii Agent 名称均可见。</li>
+          <li>剧本、3 个角色图、场景资产、3 个道具结果、4 个分镜提示与 4 个视频卡在页面出现。</li>
+          <li>道具设计师明确邀请分镜师加入群聊。</li>
+          <li>用户有满意/修改、样片/全部、预览/剪辑/下载等选择。</li>
+          <li>场景多视图缺失曾阻塞道具流程；最终又出现音效/BGM未完全生成警告。</li>
+          <li>资产库为空与画布已有资产同时出现。</li>
+        </ul></article>
+        <article class="tri-card infer"><h3>合理推断</h3><ul>
+          <li>Oii Agent 可能承担路由或会话编排，但页面不足以确认其为独立执行 Agent。</li>
+          <li>艺术总监配置被编剧及下游读取；编剧脚本又被角色、场景、道具和分镜使用。</li>
+          <li>从“全部准备就绪”可推断场景多视图后来大概率被补齐，但没有直接修复结果截图。</li>
+          <li>画布连线可能表达引用或依赖关系，但不能证明存在稳定资产 ID。</li>
+          <li>分镜师在样片确认后被再次调用，且承接了视频生成能力。</li>
+        </ul></article>
+        <article class="tri-card unknown"><h3>尚未确认</h3><ul>
+          <li>官方工具名、参数、模型调用日志、隐藏思维链、完整 System Prompt。</li>
+          <li>长期用户偏好、历史项目、Face ID、音色库、权限是否被 Agent 读取。</li>
+          <li>上游修改后下游资产是否自动失效、重跑或保留多版本。</li>
+          <li>生成失败、余额不足、安全拦截、用户中断后的状态机与费用策略。</li>
+          <li>音效/BGM与最终合成由谁负责；最终视频是否真正满足需求。</li>
+          <li>聊天、任务、画布和资产库中哪一个是权威状态源。</li>
+        </ul></article>
+      </div>
+    </section>
+
+    <section id="validate">
+      <div class="section-head"><div><div class="section-no">09 · NEXT VALIDATION</div><h2>最值得继续验证的五个问题</h2><p class="lead">这些问题能最大幅度降低 Agent 契约的不确定性，也直接影响同类产品的状态一致性、成本透明度与可恢复性设计。</p></div></div>
+      <ol class="validation-list">
+        <li><div><strong>上游修改会怎样传播？</strong><br><span class="note">修改剧本或角色后，观察分镜与视频是否标记过期、自动失效、产生新版本或重新扣费。</span></div></li>
+        <li><div><strong>失败与余额不足由谁接管？</strong><br><span class="note">刻意触发生成失败或余额不足，记录错误组件、负责 Agent、重试入口、费用回滚和已有资产保留。</span></div></li>
+        <li><div><strong>场景多视图补偿的真实闭环是什么？</strong><br><span class="note">完整记录“发现缺失→调用生成→资产出现→状态更新→道具恢复”的每一步与证据。</span></div></li>
+        <li><div><strong>跨页面资产是否有稳定引用与单一真相源？</strong><br><span class="note">刷新、重开项目并编辑资产，检查画布连线、资产库、聊天状态、任务状态及历史版本是否一致。</span></div></li>
+        <li><div><strong>谁负责音效、BGM、最终合成和质量验收？</strong><br><span class="note">完成最终预览，确认是否新增 Agent、具体输入输出、完整性门槛，以及“已完成”是否由实际可播放结果验证。</span></div></li>
+      </ol>
+      <div class="callout" style="margin-top:20px"><strong>本轮停止点：</strong>报告止于 Agent 契约、工具与全局上下文假设，不继续编写完整 System Prompt。下一步应先由使用者核对 Agent 的输入、输出、工具和上下文边界。</div>
+    </section>
+  </main>
+
+  <footer>OiiOii 创作流程 Agent 契约拆解 · 基于指定截图样本 · 证据不足处不作事实断言</footer>
+
+  <script>
+    const level = (kind, text, ev = '') => `<span class="badge ${kind}">${kind === 'fact' ? '页面事实' : kind === 'infer' ? '合理推断' : '尚未确认'}</span> ${text}${ev ? ` <span class="evidence-ref">${ev}</span>` : ''}`;
+    const agents = [
+      {
+        id:'oii', name:'Oii Agent', color:'#18345b', type:'shell', role:'会话 / 任务界面身份；独立编排能力未知',
+        first:'用户在 Oii Agent 会话输入原始需求。', trigger:'用户发送消息或在底部 Agent 选择器中处于 Oii Agent。', product:'会话壳、任务区域、Agent/Skills/风格/Assets 入口',
+        upstream:'用户', downstream:'艺术总监（路由关系为推断）', reentry:'会话全程可见；是否作为执行体重入未知', grade:'infer', ev:'EV01、EV09',
+        goal:'承载用户任务、展示多 Agent 会话与项目状态；可能负责路由，但现有页面只能确认界面身份。',
+        inputs:[
+          ['用户当前输入', '原始短剧需求、满意/修改/生成/继续等点击在同一会话发生。', 'fact','EV01–EV08'],
+          ['用户长期信息', '页面可见中文界面与 1,233 STAR 余额；Oii Agent 是否读取它们未知。', 'unknown','EV01'],
+          ['项目全局上下文', '画布、任务状态、Agent 选择器同屏可见；是否由 Oii Agent 读取未知。', 'unknown','EV01、EV09'],
+          ['上游 Agent 输出', '无上游专业 Agent；它位于用户入口。', 'fact','EV01'],
+          ['平台公共资产', '可见 Skills、3D言情、Assets 入口；实际检索/调用未知。', 'unknown','EV01'],
+          ['工具或运行时结果', '聊天中聚合各 Agent 回复、任务与画布状态，但不证明 Oii Agent 接收了结构化工具结果。', 'infer','EV01–EV14']
+        ],
+        judgments:[
+          ['把初始任务交给艺术总监', 'infer','EV01'],
+          ['维护当前任务/Agent 展示状态', 'infer','EV01'],
+          ['判断任务最终完成或异常', 'unknown','EV08–EV09']
+        ],
+        tools:[['管理会话与任务（功能命名）','界面存在，后台调用未知','infer','EV01'],['路由到专业 Agent（功能命名）','从时序推断，未见显式调用','infer','EV01'],['读取/写入共享项目上下文（功能命名）','未见结构化结果','unknown','—']],
+        outputs:[['用户回复','承载专业 Agent 对话与公开判断摘要','fact','EV01–EV14'],['页面组件','任务、Agent、Skills、风格与资产入口','fact','EV01'],['结构化字段','当前 Agent / 任务字段可能存在，后台结构未知','unknown','EV01'],['视觉/音视频资产','不确认由 Oii Agent 直接生产','unknown','EV03–EV07'],['状态','聊天任务状态可见但与画布/资产库有冲突','fact','EV09'],['下游任务','可能触发艺术总监','infer','EV01']],
+        context:[['原始需求','写入/转交','用户','艺术总监及下游','首条消息','infer','EV01'],['当前 Agent / 任务状态','读写未知','Oii Agent/平台','界面','阶段切换时','unknown','EV01'],['账户余额','是否读取未知','平台','计费系统','生成前可能读取','unknown','EV01']],
+        completion:'尚未确认。页面即使显示无当前任务，也不能覆盖最终素材未齐和资产库为空的证据。',
+        exceptions:'未观察到 Oii Agent 对失败、余额不足、中断或恢复的明确处理。',
+        unknowns:['是否是独立模型/Agent，还是纯 UI 名称','是否持有共享记忆和路由状态机','是否负责费用、安全与全局完成判定']
+      },
+      {
+        id:'art', name:'艺术总监', color:'#2869d8', type:'specialist', role:'初始化工作流与短片项目参数',
+        first:'用户提交故事梗概后首次专业回复。', trigger:'收到原始短剧需求。', product:'“规划完成”、参数活动项、影片参数/风格组件',
+        upstream:'用户 / Oii Agent（后者为推断）', downstream:'编剧（按时序推断）', reentry:'未观察到重入', grade:'fact', ev:'EV01',
+        goal:'把自然语言创作需求转成可进入生产链的项目配置，并启动工作流。',
+        inputs:[
+          ['用户当前输入','完整现代言情短剧梗概。','fact','EV01'],
+          ['用户长期信息','未看到其读取历史偏好、角色库、权限或余额。','unknown','—'],
+          ['项目全局上下文','项目尚在初始化；可见风格“3D言情”和“影片长度”字段，但具体时长/比例/语言值被遮挡。','fact','EV01'],
+          ['上游 Agent 输出','若 Oii Agent 做了路由，其结构化输出不可见。','unknown','EV01'],
+          ['平台公共资产','风格选项“3D言情”可见；风格库、规则和模型能力列表是否被调用未知。','fact','EV01'],
+          ['工具或运行时结果','活动项“激活工作流”“更新短片参数”出现勾选。','fact','EV01']
+        ],
+        judgments:[['识别故事框架并规划工作流','fact','EV01'],['判断哪些影片参数需配置','fact','EV01'],['何时自动交给编剧、是否要求参数确认','unknown','EV01'],['是否验证配置与需求一致','unknown','—']],
+        tools:[['激活工作流','页面原文活动项，有完成勾选','fact','EV01'],['更新短片参数','页面原文活动项，有完成勾选','fact','EV01'],['读取原始需求（功能命名）','回复表明已理解，具体读写接口未知','infer','EV01']],
+        outputs:[['用户回复','“规划完成”与对故事理解摘要','fact','EV01'],['页面组件','影片参数/风格区域','fact','EV01'],['结构化字段','短片参数被更新；具体值不完整','fact','EV01'],['视觉/音视频资产','无直接生产证据','fact','EV01'],['状态','工作流被激活','fact','EV01'],['下游任务','进入编剧阶段','infer','EV10']],
+        context:[['original_request','读取','用户','艺术总监','首次回复','fact','EV01'],['workflow_status','写入','艺术总监','平台/下游','初始化','fact','EV01'],['style','写入或确认','用户/艺术总监','所有视觉 Agent','初始化','fact','EV01'],['duration / aspect / language','写入迹象','艺术总监','编剧/分镜师','初始化','unknown','EV01']],
+        completion:'“激活工作流”“更新短片参数”显示勾选；仅能确认该阶段活动完成，不能确认配置质量。',
+        exceptions:'未观察缺参、冲突、安全或计费异常处理。',
+        unknowns:['具体时长、比例、对白语言','参数是用户选择还是自动推导','对下游是否有硬性开始门槛']
+      },
+      {
+        id:'writer', name:'编剧', color:'#7650c7', type:'specialist', role:'把故事梗概扩写为可确认的剧本资产',
+        first:'艺术总监阶段之后，画布出现“我的剧本”。', trigger:'项目初始化后进入剧本阶段（交接未显式展示）。', product:'剧本正文、公开判断摘要、满意/修改按钮',
+        upstream:'艺术总监（推断）', downstream:'角色设计师（推断）', reentry:'页面提供修改入口；实际重入未截取', grade:'fact', ev:'EV02、EV10、EV11',
+        goal:'形成可供角色、场景、道具和分镜继续使用的结构化故事/场景文本。',
+        inputs:[
+          ['用户当前输入','原始故事梗概；是否有额外剧本或补充说明未见。','fact','EV01'],
+          ['用户长期信息','未看到读取历史剧本、默认语气或偏好。','unknown','—'],
+          ['项目全局上下文','风格可见；时长/比例/语言可能约束剧本，但读取证据不足。','infer','EV01–EV02'],
+          ['上游 Agent 输出','艺术总监配置大概率作为约束；实际字段传递不可见。','infer','EV01、EV10'],
+          ['平台公共资产','公开摘要提到围绕“觉醒”搜索故事动画剧本知识；不等同已确认外部工具调用。','fact','EV02'],
+          ['工具或运行时结果','“我的剧本”画布资产是实际生成结果。','fact','EV10']
+        ],
+        judgments:[['根据原始需求组织场景、人物与冲突','fact','EV02、EV10'],['判断剧本是否可交给用户确认','fact','EV02'],['满意则继续、修改则进入纠偏','fact','EV02'],['修改后如何重跑和影响下游','unknown','—'],['是否真正验证故事质量与时长匹配','unknown','—']],
+        tools:[['检索剧本知识（功能命名）','仅有公开摘要，执行接口/结果未知','infer','EV02'],['生成并写入剧本（功能命名）','画布有“我的剧本”资产','fact','EV10'],['更新用户确认状态（功能命名）','按钮存在，状态写入未直接展示','infer','EV02']],
+        outputs:[['用户回复','剧本完成说明与判断摘要','fact','EV02'],['页面组件','“满意，请继续”“我要修改”','fact','EV02'],['结构化字段','剧本、场景与人物文本','fact','EV10'],['视觉/音视频资产','无','fact','EV10'],['下游任务','剧本确认后进入角色设计','infer','EV03']],
+        context:[['script','写入','编剧','角色/场景/道具/分镜','生成后','fact','EV10'],['script_confirmation','写入迹象','用户/编剧','下游','点击按钮','infer','EV02'],['creative_knowledge_summary','读取迹象','平台','编剧','剧本规划时','infer','EV02']],
+        completion:'Agent 说明完成，且画布确有剧本资产；质量和时长适配没有独立验证证据。',
+        exceptions:'可见“我要修改”入口，但未观察实际修改、失败或版本回退。',
+        unknowns:['剧本结构化 schema','用户修改后的版本策略','是否使用平台提示词模板或内容安全规则']
+      },
+      {
+        id:'character', name:'角色设计师', color:'#b88005', type:'specialist', role:'从剧本生成主要角色视觉资产',
+        first:'剧本阶段后，画布和页面出现角色设计师与三张角色图。', trigger:'剧本确认后（按时序推断）。', product:'许清和、顾砚、江叙白角色卡与图片',
+        upstream:'编剧（推断）', downstream:'场景设计师（推断）', reentry:'有修改入口；实际重入未截取', grade:'fact', ev:'EV03、EV11',
+        goal:'为主要人物建立可供场景和分镜引用的视觉形象。',
+        inputs:[
+          ['用户当前输入','用户未在当前样本上传角色参考图；可见的是满意/修改选择。','fact','EV03'],
+          ['用户长期信息','历史角色、Face ID、用户资产库是否读取未知；资产库截图为空。','unknown','EV09'],
+          ['项目全局上下文','剧本人物、3D言情风格可能被读取。','infer','EV01、EV10'],
+          ['上游 Agent 输出','编剧中的人物姓名与描述。','infer','EV10、EV03'],
+          ['平台公共资产','图片模型、公共角色模板、风格库与版权规则未展示。','unknown','—'],
+          ['工具或运行时结果','三张角色图和对应卡片真实出现。','fact','EV03']
+        ],
+        judgments:[['识别需要生成的主要角色','infer','EV03、EV10'],['判断三张角色图可供用户确认','fact','EV03'],['用户不满意时允许修改','fact','EV03'],['角色一致性、Face ID和质量是否验证','unknown','—']],
+        tools:[['提取角色列表（功能命名）','由角色结果反推','infer','EV03'],['生成角色主图（功能命名）','三张图可见','fact','EV03'],['写入角色卡（功能命名）','姓名与图片卡可见','fact','EV03'],['更新角色信息/重生成（功能命名）','入口可见，实际调用未观察','unknown','EV03']],
+        outputs:[['用户回复','角色生成结果与确认提示','fact','EV03'],['页面组件','3 张卡、满意/修改/编辑入口','fact','EV03'],['结构化字段','角色列表与姓名','fact','EV03'],['视觉/音视频资产','3 个角色主图','fact','EV03'],['下游任务','进入场景阶段','infer','EV04']],
+        context:[['character_list','写入','角色设计师','场景/道具/分镜','剧本确认后','fact','EV03'],['character_assets','写入','角色设计师','画布/分镜','图像生成后','fact','EV03'],['character_reference_ids','写入未知','角色设计师','下游','生成后','unknown','—']],
+        completion:'三张角色图存在且可确认；Agent 是否检查人物一致性、可复用性或与剧本吻合度未知。',
+        exceptions:'修改入口存在；生成失败、局部重做、旧版保留和 Face ID 处理未观察。',
+        unknowns:['是否创建稳定角色 ID / Face ID','是否使用用户参考图与资产库','角色修改会否使分镜失效']
+      },
+      {
+        id:'scene', name:'场景设计师', color:'#d25a2a', type:'specialist', role:'生成场景资产并检查多视图前置完整性',
+        first:'角色阶段后出现；在用户要生成道具时报告场景多视图缺失。', trigger:'角色完成后进入场景阶段（推断）；用户“生成道具”触发依赖检查（事实）。', product:'场景卡、多视图缺失说明与补偿计划',
+        upstream:'角色设计师 / 编剧（推断）', downstream:'道具设计师（推断）', reentry:'缺失修复意味着可能重入，实际调用过程未完整展示', grade:'fact', ev:'EV04、EV11、EV12',
+        goal:'把剧本空间转成场景视觉资产，并保证进入道具/分镜前的场景资料达到最低完整性。',
+        inputs:[
+          ['用户当前输入','用户点击“生成道具”，成为依赖检查触发。','fact','EV04'],
+          ['用户长期信息','历史场景、默认风格、项目模板未见读取。','unknown','—'],
+          ['项目全局上下文','剧本场景、角色/风格资产和场景多视图状态可能被读取。','infer','EV04、EV10'],
+          ['上游 Agent 输出','编剧场景描述与角色视觉资产。','infer','EV03–EV04'],
+          ['平台公共资产','场景模板、图片模型、镜头规则未展示。','unknown','—'],
+          ['工具或运行时结果','检测到“场景多视图缺失”是可见运行状态；后续结果只由“全部准备就绪”间接支持。','fact','EV04、EV12']
+        ],
+        judgments:[['道具生成前检查场景多视图是否齐全','fact','EV04'],['缺失时暂停并解释先补场景','fact','EV04'],['补齐后允许继续道具流程','infer','EV12'],['是否真正核验补齐结果质量','unknown','—']],
+        tools:[['读取场景状态（功能命名）','页面反馈缺失状态','fact','EV04'],['生成场景主图（功能命名）','画布有场景资产','fact','EV04、EV11'],['生成场景多视图（功能命名）','Agent 宣布计划；直接结果未见','infer','EV04、EV12'],['更新场景就绪状态（功能命名）','从后续“全部就绪”推断','infer','EV12']],
+        outputs:[['用户回复','阻塞原因和修复计划','fact','EV04'],['页面组件','场景卡及继续流程反馈','fact','EV04'],['结构化字段','场景列表、多视图状态','infer','EV04'],['视觉/音视频资产','场景图可见，多视图结果未直证','fact','EV04'],['下游任务','就绪后进入道具设计','infer','EV12']],
+        context:[['scene_list','写入','场景设计师','道具/分镜','场景生成时','infer','EV04'],['scene_assets','写入','场景设计师','画布/分镜','生成时','fact','EV04'],['scene_multiview_status','读取/写入迹象','场景设计师','道具流程','依赖检查时','fact','EV04'],['scene_reference_ids','写入未知','场景设计师','分镜','生成时','unknown','—']],
+        completion:'场景资产可见；多视图修复完成没有直接截图，只能由下游“全部准备就绪”合理推断。',
+        exceptions:'本样本唯一明确的前置依赖阻塞。是否自动重试、允许跳过或回退未知。',
+        unknowns:['多视图数量和质量标准','修复是否真的生成新资产','阻塞状态如何写入/清除']
+      },
+      {
+        id:'prop', name:'道具设计师', color:'#07858c', type:'specialist', role:'提取关键道具、生成主图并显式交接分镜师',
+        first:'场景前置条件处理后出现；S16 展示完成摘要与邀请。', trigger:'用户选择生成道具，且场景前置条件满足。', product:'3 个道具卡、就绪摘要、邀请分镜师',
+        upstream:'场景设计师（推断）', downstream:'分镜师（页面明确）', reentry:'未观察到重入', grade:'fact', ev:'EV04、EV12',
+        goal:'把剧本中的关键可交互物转成视觉资产，确认角色/场景/道具齐备后交接分镜。',
+        inputs:[
+          ['用户当前输入','“生成道具”指令。','fact','EV04'],
+          ['用户长期信息','用户道具库、历史版本与默认偏好未见。','unknown','EV09'],
+          ['项目全局上下文','剧本、角色、场景、多视图就绪状态。','infer','EV04、EV12'],
+          ['上游 Agent 输出','场景资产/就绪状态；角色和剧本中的道具线索。','infer','EV10、EV12'],
+          ['平台公共资产','图片模型、公共道具模板、版权规则未展示。','unknown','—'],
+          ['工具或运行时结果','三张道具主图与“均已准备就绪”摘要可见。','fact','EV12']
+        ],
+        judgments:[['从故事中识别关键道具','infer','EV04、EV12'],['判断道具主图是否达到进入分镜条件','fact','EV12'],['检查角色/场景/道具整体就绪','fact','EV12'],['就绪后邀请分镜师','fact','EV12'],['是否验证道具与角色动作/尺度一致','unknown','—']],
+        tools:[['提取关键道具（功能命名）','从结果反推，页面未示官方调用','infer','EV04'],['生成道具主图（功能命名）','3 个道具图可见','fact','EV12'],['写入道具卡（功能命名）','画布卡片可见','fact','EV12'],['检查项目视觉资产就绪（功能命名）','公开摘要称全部就绪','fact','EV12'],['邀请下游 Agent','页面原文明确','fact','EV12']],
+        outputs:[['用户回复','道具完成与整体就绪摘要','fact','EV12'],['页面组件','3 个道具卡','fact','EV12'],['结构化字段','道具列表/资产与就绪状态','infer','EV12'],['视觉/音视频资产','3 个道具主图','fact','EV12'],['下游任务','邀请分镜师加入群聊','fact','EV12']],
+        context:[['prop_list','写入','道具设计师','分镜师','提取后','infer','EV12'],['prop_assets','写入','道具设计师','画布/分镜师','生成后','fact','EV12'],['visual_assets_ready','写入迹象','道具设计师','分镜师','交接前','fact','EV12'],['handoff_target','写入/触发','道具设计师','分镜师','就绪后','fact','EV12']],
+        completion:'三张道具主图与“角色、场景、道具均已准备就绪”同时出现，并完成显式下游邀请。质量验证仍不可确认。',
+        exceptions:'前置场景缺失时不会直接继续；道具自身生成失败/修改/重试未观察。',
+        unknowns:['三个道具是否都有稳定引用 ID','道具修改后分镜如何更新','“就绪”是 Agent 判断还是系统校验']
+      },
+      {
+        id:'storyboard', name:'分镜师', color:'#2869d8', type:'specialist', role:'拆分镜头、生成提示词、样片与批量分镜视频',
+        first:'被道具设计师明确邀请后加入。', trigger:'角色/场景/道具被声明就绪并收到邀请；随后接收用户模型与生成方式选择。', product:'4 镜头提示、样片、4 视频卡、预览/剪辑/下载与完整性警告',
+        upstream:'道具设计师（页面明确）；剧本/角色/场景资产（读取为推断）', downstream:'最终预览/剪辑入口；未见独立下游 Agent', reentry:'是：方案→样片→满意后批量→预览检查', grade:'fact', ev:'EV05–EV08、EV12–EV14',
+        goal:'把项目资产转成可生成的镜头描述和视频结果，并通过样片门槛控制批量生成。',
+        inputs:[
+          ['用户当前输入','Seedance 2.0、Pro/Fast、720p/480p、不生成分镜图、先样片/全部、满意继续。','fact','EV05–EV06、EV13'],
+          ['用户长期信息','自定义音色条件可见；已上传音色、Face ID、会员权限是否存在/读取未知。','unknown','EV05'],
+          ['项目全局上下文','剧本、4 个镜头、角色/场景/道具资产、模型、分辨率、任务状态、已有视频。','infer','EV05–EV07、EV13'],
+          ['上游 Agent 输出','道具设计师交接的“角色、场景、道具已就绪”；具体引用地址不可见。','fact','EV12'],
+          ['平台公共资产','Seedance 2.0 能力选项与公开“觉醒”运镜知识摘要可见；真实知识库/模型函数未知。','fact','EV05、EV13'],
+          ['工具或运行时结果','样片、其余 3 个视频、4 视频卡与素材未齐警告。','fact','EV06–EV08、EV14']
+        ],
+        judgments:[['决定拆成 4 个镜头','fact','EV13'],['用户不生成分镜图时改为直接生成画面/声音/对白提示','fact','EV05、EV13'],['允许先做样片或全部生成','fact','EV13'],['样片满意后生成其余镜头','fact','EV06、EV14'],['最终预览前检查视频/音效/BGM完整性','fact','EV08'],['是否验证视频内容、人物一致性和台词准确性','unknown','EV07']],
+        tools:[['读取项目上下文（功能命名）','从提示词引用项目资产反推','infer','EV12–EV13'],['提取分镜列表（功能命名）','公开说明与 4 个结果相互支持','fact','EV13'],['检索运镜知识（功能命名）','有公开摘要，接口未知','infer','EV13'],['生成分镜提示词（功能命名）','画面/声音/对白提示可见','fact','EV13'],['生成视频样片（功能命名）','样片可见','fact','EV06'],['批量生成分镜视频（功能命名）','其余 3 个视频可见','fact','EV14'],['写入视频卡（功能命名）','4 卡和操作入口可见','fact','EV07'],['检查最终素材完整性（功能命名）','警告可见','fact','EV08']],
+        outputs:[['用户回复','方案、镜头提示、进度与完成说明','fact','EV13–EV14'],['页面组件','模型/分辨率、样片/全部、满意继续、预览/剪辑/下载、警告','fact','EV05–EV08'],['结构化字段','4 镜头、提示词、模型/分辨率选择','fact','EV05、EV13'],['视觉/音视频资产','4 个分镜视频；独立音效/BGM未齐','fact','EV07–EV08'],['状态','样片完成、批量生成、素材不完整','fact','EV06–EV08'],['下游任务','打开最终预览或剪辑；无独立 Agent 交接证据','fact','EV07']],
+        context:[['storyboard_list','写入','分镜师','视频生成/界面','方案完成','fact','EV13'],['shot_prompts','写入','分镜师','视频生成','每镜头生成前','fact','EV13'],['video_model / mode / resolution','读取/写入','用户/分镜师','视频生成','配置时','fact','EV05'],['video_assets','写入','分镜师/运行时','画布/预览/剪辑','每次生成后','fact','EV06–EV07'],['audio_bgm_status','读取迹象','运行时','完整性检查','预览前','fact','EV08'],['sample_confirmation','读取/写入迹象','用户','分镜师','样片后','fact','EV06']],
+        completion:'只可确认 4 个分镜视频卡出现；最终完整视频、音效/BGM和质量验收没有完成证据。',
+        exceptions:'发现素材未齐时显示警告；视频生成失败、余额不足、安全拦截、用户中断、重试和退款未观察。',
+        unknowns:['视频生成是否由分镜师直接调用或后台子系统执行','音频/BGM负责角色','失败重试与成本策略','视频与上游资产的稳定引用关系']
+      }
+    ];
+
+    const tools = [
+      ['T01','激活工作流（页面原文）','艺术总监','原始需求','活动项勾选','页面事实','EV01'],
+      ['T02','更新短片参数（页面原文）','艺术总监','需求、风格/影片参数','活动项勾选；具体值不全','页面事实','EV01'],
+      ['T03','读取项目上下文（功能命名，并非官方工具名）','Oii Agent / 下游 Agents','剧本、资产、状态','下游结果引用上游内容','合理推断','EV10–EV13'],
+      ['T04','检索剧本知识（功能命名，并非官方工具名）','编剧','主题“觉醒”等','公开判断摘要','合理推断；非工具结果直证','EV02'],
+      ['T05','生成并写入剧本（功能命名，并非官方工具名）','编剧','需求、项目参数','“我的剧本”资产','页面事实','EV10'],
+      ['T06','生成角色主图（功能命名，并非官方工具名）','角色设计师','人物描述、风格','3 张角色图','页面事实','EV03'],
+      ['T07','读取/检查场景多视图状态（功能命名，并非官方工具名）','场景设计师','场景资产状态','缺失提示并阻塞','页面事实','EV04'],
+      ['T08','生成场景多视图（功能命名，并非官方工具名）','场景设计师','场景主图','直接结果未截取','合理推断','EV04、EV12'],
+      ['T09','提取关键道具（功能命名，并非官方工具名）','道具设计师','剧本、场景','3 个道具结果','合理推断','EV04、EV12'],
+      ['T10','生成道具主图（功能命名，并非官方工具名）','道具设计师','道具描述、风格','3 张道具图','页面事实','EV12'],
+      ['T11','邀请下游 Agent','道具设计师','整体就绪状态','邀请分镜师加入群聊','页面事实','EV12'],
+      ['T12','保存视频配置（功能命名，并非官方工具名）','分镜师','模型、模式、分辨率、音色条件','表单选择可见；持久化未知','尚未确认','EV05'],
+      ['T13','提取分镜列表（功能命名，并非官方工具名）','分镜师','剧本与视觉资产','4 个镜头','页面事实','EV13'],
+      ['T14','检索运镜知识（功能命名，并非官方工具名）','分镜师','“觉醒”等镜头主题','公开知识摘要','合理推断；非工具结果直证','EV13'],
+      ['T15','生成分镜提示词（功能命名，并非官方工具名）','分镜师','镜头、角色/场景/道具','画面/声音/对白提示','页面事实','EV13'],
+      ['T16','生成视频样片/批量视频（功能命名，并非官方工具名）','分镜师','提示词、模型、分辨率','样片与其余 3 个视频','页面事实','EV06、EV14'],
+      ['T17','写入画布资产（功能命名，并非官方工具名）','各专业 Agent','剧本/图片/视频结果','画布节点出现；资产库未同步','页面事实但一致性异常','EV03、EV07、EV09、EV10'],
+      ['T18','检查最终素材完整性（功能命名，并非官方工具名）','分镜师/平台','视频、音效、BGM状态','素材未完全生成警告','页面事实','EV08'],
+      ['T19','检查余额 / 计费（功能命名，并非官方工具名）','未知','1,233 STAR、生成请求','未见扣减或错误','尚未确认','EV01'],
+      ['T20','生成音效/BGM（功能命名，并非官方工具名）','未知','分镜与视频','未完成警告，无资产结果','尚未确认','EV08']
+    ];
+
+    const contexts = [
+      ['original_request','现代言情短剧完整梗概','用户','艺术总监、编剧及下游','首条消息可见；共享读取为推断','单一版本可见','事实/推断 · EV01'],
+      ['workflow_status','“激活工作流”勾选','艺术总监','平台、下游','写入迹象明确','与最终未齐状态不是同一层级','事实 · EV01'],
+      ['style','3D言情','用户/艺术总监','所有视觉 Agent','界面选择可见','风格 ID 与版本未知','事实 · EV01'],
+      ['duration / aspect / dialogue_language','字段区域存在，具体值被遮挡','艺术总监/用户','编剧、分镜师','可能写入与读取','值、单位、版本未知','未知 · EV01'],
+      ['script','“我的剧本”，含豪华包厢场景','编剧','角色/场景/道具/分镜','画布资产明确','是否有多版本未知','事实 · EV10'],
+      ['script_confirmation','满意 / 修改入口','用户/编剧','角色设计师','按钮可见，持久化状态未知','版本门控未知','推断 · EV02'],
+      ['character_list','许清和、顾砚、江叙白','角色设计师','场景/道具/分镜','卡片明确','稳定角色 ID 未显示','事实 · EV03'],
+      ['character_assets','3 张角色主图','角色设计师','画布、分镜','结果明确','Face ID/历史版本未知','事实 · EV03'],
+      ['scene_list / scene_assets','主要场景卡可见','场景设计师','道具/分镜','结果与状态提示可见','稳定场景 ID 未显示','事实/推断 · EV04'],
+      ['scene_multiview_status','曾缺失，后来被称整体就绪','场景设计师','道具流程','读取明确；修复写入间接','前后状态缺少直接版本证据','事实/推断 · EV04、EV12'],
+      ['prop_list / prop_assets','3 个道具结果','道具设计师','分镜师','卡片与摘要可见','稳定道具 ID 未显示','事实 · EV12'],
+      ['visual_assets_ready','角色/场景/道具均准备就绪','道具设计师或平台','分镜师','交接前摘要可见','是否系统校验未知','事实/未知 · EV12'],
+      ['storyboard_list','4 个镜头','分镜师','提示词/视频生成','数量和内容可见','版本与引用边未知','事实 · EV13'],
+      ['shot_prompts','画面、声音、对白提示','分镜师','视频生成','页面文本可见','提示词历史未知','事实 · EV13'],
+      ['video_model / mode / resolution','Seedance 2.0；Pro/Fast；720p/480p','用户/分镜师','视频生成运行时','表单可见','选中值/持久化不完全可辨','事实/未知 · EV05'],
+      ['custom_voice','条件选项可见','用户/平台','音频/视频生成','是否启用与音色资产未知','历史音色库未知','未知 · EV05'],
+      ['video_assets','样片 + 其余 3 个分镜视频','分镜师/运行时','预览、剪辑、下载','4 张卡可见','聊天进度与完成卡可能不同步','事实 · EV06–EV07、EV14'],
+      ['audio_bgm_status','未完全生成','未知','最终预览检查','警告明确','无对应资产或生产者','事实/未知 · EV08'],
+      ['current_task_state','页面仍可见生成过程/无任务等状态','平台','界面/Oii Agent','状态可见','与画布结果存在潜在冲突','事实 · EV09、EV14'],
+      ['asset_library / history','“这里还什么都没有”','平台','用户/各 Agent','读结果明确','与画布已有资产冲突','事实 · EV09'],
+      ['balance','1,233 STAR','平台账户','计费/生成系统','仅展示','是否检查/扣减未知','事实/未知 · EV01'],
+      ['stable_reference_graph','画布视觉连线','未知','下游 Agents','连线可见，ID/API不可见','无法确认引用稳定性与失效规则','未知 · EV11']
+    ];
+
+    const dataflows = [
+      ['用户','原始需求','艺术总监 / 编剧','理解故事并初始化/写剧本','首条输入','不适用','事实+推断 · EV01'],
+      ['艺术总监','工作流与短片参数','编剧及视觉下游','约束创作流程','是否确认不清楚','修改后是否重跑未知','合理推断 · EV01'],
+      ['编剧','剧本、人物与场景文本','角色/场景/道具/分镜','提取资产与镜头信息','满意/修改按钮','下游是否失效未知','事实+推断 · EV02、EV10'],
+      ['角色设计师','角色列表与 3 张主图','场景/分镜','视觉一致性参考','满意/修改入口','修改后下游是否失效未知','事实+推断 · EV03'],
+      ['场景设计师','场景资产与多视图状态','道具设计师 / 分镜师','满足前置条件和镜头背景','缺失时阻塞','修复生成与版本更新未直证','事实+推断 · EV04、EV12'],
+      ['道具设计师','3 个道具资产、整体就绪状态','分镜师','进入分镜所需视觉资产','整体就绪后交接','道具修改后的分镜失效未知','页面事实 · EV12'],
+      ['分镜师','4 镜头与提示词','视频生成运行时','将描述转成视频','先样片/全部','提示词修改如何影响视频未知','页面事实 · EV13'],
+      ['视频运行时 / 分镜师','样片','用户 / 分镜师','用户验收后决定是否批量','满意/不满意','不满意重做与费用未知','页面事实 · EV06'],
+      ['视频运行时 / 分镜师','4 个分镜视频','预览 / 剪辑 / 下载','后续组装与导出','预览/剪辑/下载','单片修改与最终合成版本未知','页面事实 · EV07、EV14'],
+      ['音效/BGM生产者（未知）','音效/BGM状态','最终预览检查','决定是否允许完整预览','取消/确认警告','生成、重试、补齐路径未知','事实+未知 · EV08'],
+      ['各专业 Agent','画布资产','资产库','理论上应同步与复用','无','实际显示为空，单向写入关系未证实','冲突事实 · EV09']
+    ];
+
+    function renderAgents(){
+      document.getElementById('agentStrip').innerHTML = agents.map((a,i)=>`<div class="agent-mini" style="--agent:${a.color}"><span class="seq">${String(i+1).padStart(2,'0')}</span><strong>${a.name}</strong><small>${a.role}</small></div>`).join('');
+      document.querySelector('#agentInventory tbody').innerHTML = agents.map((a,i)=>`<tr><td>${i+1}</td><td><b style="color:${a.color}">${a.name}</b><br><small>${a.role}</small></td><td>${a.first}<br><span class="note">触发：${a.trigger}</span></td><td>${a.product}</td><td>${a.upstream}<br>→ ${a.downstream}</td><td>${a.reentry}</td><td>${level(a.grade,a.grade==='fact'?'名称/产出有直接证据':'职责边界含推断',a.ev)}</td></tr>`).join('');
+    }
+
+    function listItems(items){ return `<ul>${items.map(x=>`<li>${level(x[1],x[0],x[2])}</li>`).join('')}</ul>`; }
+    function renderContracts(){
+      document.getElementById('contractGrid').innerHTML = agents.map(a=>{
+        const inputs = a.inputs.map(x=>`<div class="io-group"><strong>${x[0]}</strong>${level(x[2],x[1],x[3])}</div>`).join('');
+        const toolsHtml = `<div class="table-wrap"><table class="mini-table"><thead><tr><th>工具/能力</th><th>执行证据</th><th>等级</th></tr></thead><tbody>${a.tools.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${level(x[2],'',x[3])}</td></tr>`).join('')}</tbody></table></div>`;
+        const outputs = `<div class="table-wrap"><table class="mini-table"><thead><tr><th>输出类型</th><th>内容</th><th>等级</th></tr></thead><tbody>${a.outputs.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${level(x[2],'',x[3])}</td></tr>`).join('')}</tbody></table></div>`;
+        const context = `<div class="table-wrap"><table class="mini-table"><thead><tr><th>字段/对象</th><th>读取/写入</th><th>生产者</th><th>消费者</th><th>更新时机</th><th>等级</th></tr></thead><tbody>${a.context.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td>${level(x[5],'',x[6])}</td></tr>`).join('')}</tbody></table></div>`;
+        return `<article class="contract" data-type="${a.type}" style="--agent:${a.color}">
+          <div class="contract-head"><div class="contract-title"><h3>Agent：${a.name}</h3><span class="tag">${a.type==='shell'?'界面/编排身份':'专业执行角色'}</span></div><p class="contract-summary">${a.role}</p></div>
+          <details open><summary>1. 核心目标</summary><div class="detail-body"><p>${a.goal}</p></div></details>
+          <details><summary>2. 触发条件</summary><div class="detail-body"><p>${a.trigger}</p><p><b>上游：</b>${a.upstream}　<b>下游：</b>${a.downstream}</p></div></details>
+          <details><summary>3. 输入信息（六类来源）</summary><div class="detail-body">${inputs}</div></details>
+          <details><summary>4. 可观察判断</summary><div class="detail-body">${listItems(a.judgments)}</div></details>
+          <details><summary>5. 调用工具</summary><div class="detail-body">${toolsHtml}</div></details>
+          <details><summary>6. 输出信息</summary><div class="detail-body">${outputs}</div></details>
+          <details><summary>7. 全局上下文读写</summary><div class="detail-body">${context}</div></details>
+          <details><summary>8. 完成条件</summary><div class="detail-body"><p>${a.completion}</p></div></details>
+          <details><summary>9. 异常与重试</summary><div class="detail-body"><p>${a.exceptions}</p></div></details>
+          <details><summary>10. 尚未确认的问题</summary><div class="detail-body"><ul>${a.unknowns.map(x=>`<li>${x}</li>`).join('')}</ul></div></details>
+        </article>`;
+      }).join('');
+    }
+
+    function renderRows(selector, rows, levelColumn = -1){
+      document.querySelector(`${selector} tbody`).innerHTML = rows.map(r=>`<tr>${r.map((c,i)=>`<td>${i===levelColumn ? level(c.includes('事实')?'fact':c.includes('推断')?'infer':'unknown',c) : c}</td>`).join('')}</tr>`).join('');
+    }
+
+    function initFilters(){
+      document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{
+        document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed','false'));
+        btn.setAttribute('aria-pressed','true');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.contract').forEach(card=>card.dataset.hidden = String(filter !== 'all' && card.dataset.type !== filter));
+      }));
+    }
+
+    renderAgents();
+    renderContracts();
+    renderRows('#toolTable', tools, 5);
+    renderRows('#contextTable', contexts, 6);
+    renderRows('#dataflowTable', dataflows, 6);
+    initFilters();
+  </script>
+</body>
+</html>

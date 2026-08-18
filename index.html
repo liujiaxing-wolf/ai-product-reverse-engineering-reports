@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kling AI、Vidu、Google Flow 与 OiiOii 的证据分级产品拆解报告。">
+  <title>AI 创意产品拆解报告集</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --panel: rgba(20, 24, 35, 0.84);
+      --line: rgba(255, 255, 255, 0.12);
+      --text: #f5f7fb;
+      --muted: #aab2c3;
+      --accent: #91a7ff;
+      --accent-2: #63e6be;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(99, 230, 190, 0.14), transparent 28rem),
+        radial-gradient(circle at 92% 12%, rgba(145, 167, 255, 0.18), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 72px 0 88px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      color: var(--accent-2);
+      font-size: 13px;
+      font-weight: 760;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(42px, 7vw, 78px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 28px 0 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2.4vw, 21px);
+      line-height: 1.75;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 34px 0 50px;
+    }
+
+    .stat {
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.035);
+      color: #d8deea;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -44px -70px auto;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: var(--glow, rgba(145, 167, 255, 0.17));
+      filter: blur(3px);
+      pointer-events: none;
+    }
+
+    .card-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .product-index {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+    }
+
+    h2 {
+      margin: 6px 0 7px;
+      font-size: 29px;
+      letter-spacing: -0.035em;
+    }
+
+    .product-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .badge {
+      flex: none;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: #d9dfeb;
+      font-size: 12px;
+    }
+
+    .reports {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 9px;
+    }
+
+    .report {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 14px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      text-decoration: none;
+      transition: 160ms ease;
+    }
+
+    .report:hover,
+    .report:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(145, 167, 255, 0.55);
+      background: rgba(145, 167, 255, 0.1);
+      outline: none;
+    }
+
+    .report small {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .arrow {
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 36px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    footer p { margin: 0; }
+
+    @media (max-width: 760px) {
+      .shell { padding-top: 48px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { padding: 24px; }
+      footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">AI Product Reverse Engineering</div>
+    <h1>四个 AI 创意产品，十六份拆解报告</h1>
+    <p class="lead">基于真实页面、交互状态与公开证据，整理用户旅程、Agent 契约、功能等价 System Prompt 与产品架构四个观察层级。</p>
+
+    <div class="stats" aria-label="报告统计">
+      <span class="stat">4 个产品</span>
+      <span class="stat">16 份 HTML 报告</span>
+      <span class="stat">证据 / 推断 / 建议分层</span>
+      <span class="stat">静态页面，可直接预览</span>
+    </div>
+
+    <section class="grid" aria-label="产品报告目录">
+      <article class="card" style="--glow: rgba(255, 107, 107, 0.18)">
+        <div class="card-head">
+          <div>
+            <div class="product-index">PRODUCT 01</div>
+            <h2>OiiOii</h2>
+            <p class="product-note">AI 影视创作工作流与艺术总监 Agent</p>
+          </div>
+          <span class="badge">4 reports</span>
+        </div>
+        <div class="reports">
+          <a class="report" href="reports/oiioii/01-user-journey.html"><span><small>01</small> 用户旅程问题报告</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/oiioii/02-agent-contracts.html"><span><small>02</small> Agent 契约拆解</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/oiioii/03-single-agent-system-prompt.html"><span><small>03</small> 功能等价 System Prompt</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/oiioii/04-product-architecture.html"><span><small>04</small> 产品全景架构</span><span class="arrow">↗</span></a>
+        </div>
+      </article>
+
+      <article class="card" style="--glow: rgba(255, 212, 59, 0.16)">
+        <div class="card-head">
+          <div>
+            <div class="product-index">PRODUCT 02</div>
+            <h2>Kling AI</h2>
+            <p class="product-note">可灵视频生成、Omni 与 Canvas 工作流</p>
+          </div>
+          <span class="badge">4 reports</span>
+        </div>
+        <div class="reports">
+          <a class="report" href="reports/kling/01-user-journey.html"><span><small>01</small> 用户旅程</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/kling/02-agent-contracts.html"><span><small>02</small> Agent 契约</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/kling/03-single-agent-system-prompt.html"><span><small>03</small> 功能等价 System Prompt</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/kling/04-product-architecture.html"><span><small>04</small> 产品架构</span><span class="arrow">↗</span></a>
+        </div>
+      </article>
+
+      <article class="card" style="--glow: rgba(99, 230, 190, 0.17)">
+        <div class="card-head">
+          <div>
+            <div class="product-index">PRODUCT 03</div>
+            <h2>Vidu</h2>
+            <p class="product-note">视频生成、项目制创作与 Vidu Claw</p>
+          </div>
+          <span class="badge">4 reports</span>
+        </div>
+        <div class="reports">
+          <a class="report" href="reports/vidu/01-user-journey.html"><span><small>01</small> 用户旅程</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/vidu/02-agent-contracts.html"><span><small>02</small> Agent 契约</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/vidu/03-single-agent-system-prompt.html"><span><small>03</small> 功能等价 System Prompt</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/vidu/04-product-architecture.html"><span><small>04</small> 产品架构</span><span class="arrow">↗</span></a>
+        </div>
+      </article>
+
+      <article class="card" style="--glow: rgba(116, 143, 252, 0.21)">
+        <div class="card-head">
+          <div>
+            <div class="product-index">PRODUCT 04</div>
+            <h2>Google Flow</h2>
+            <p class="product-note">面向影视创作的生成式 AI 工作台</p>
+          </div>
+          <span class="badge">4 reports</span>
+        </div>
+        <div class="reports">
+          <a class="report" href="reports/google-flow/01-user-journey.html"><span><small>01</small> 用户旅程</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/google-flow/02-agent-contracts.html"><span><small>02</small> Agent 契约</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/google-flow/03-single-agent-system-prompt.html"><span><small>03</small> 功能等价 System Prompt</span><span class="arrow">↗</span></a>
+          <a class="report" href="reports/google-flow/04-product-architecture.html"><span><small>04</small> 产品架构</span><span class="arrow">↗</span></a>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <p>报告描述观察到的产品行为与证据分级推断，不代表相关产品官方实现。</p>
+      <p>Published as a static GitHub Pages collection.</p>
+    </footer>
+  </main>
+</body>
+</html>
